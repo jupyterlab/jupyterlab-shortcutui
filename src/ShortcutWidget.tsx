@@ -2,7 +2,7 @@ import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import * as React from 'react'
 
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { ShortcutUI } from './components/ShortcutUI';
 
@@ -25,7 +25,7 @@ export default class ShortcutWidget extends VDomRenderer<VDomModel> {
   isAttached: boolean;
   title: Title<Widget>;
   reactComponent: React.ReactElement<any>;
-  app: JupyterLab
+  app: JupyterFrontEnd
 
   constructor(
     height: number, 
@@ -34,7 +34,7 @@ export default class ShortcutWidget extends VDomRenderer<VDomModel> {
     settingRegistry: ISettingRegistry,
     commandRegistry: CommandRegistry,
     shortcutPlugin: string,
-    app: JupyterLab
+    app: JupyterFrontEnd
   ) {
     super();
     this.height = height;

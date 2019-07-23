@@ -4,7 +4,7 @@ import { CommandRegistry } from '@phosphor/commands';
 
 import { ArrayExt, StringExt } from '@phosphor/algorithm';
 
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { ShortcutList } from './ShortcutList';
 
@@ -36,7 +36,7 @@ export interface IShortcutUIProps {
   commandRegistry: CommandRegistry;
   height: number;
   width: number;
-  app: JupyterLab;
+  app: JupyterFrontEnd;
 }
 
 /** State for ShortcutUI component */

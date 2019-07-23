@@ -27,7 +27,7 @@ import {
   SourceCellStyle,
   ResetStyle
 } from '../componentStyle/ShortcutItemStyle';
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {
@@ -41,7 +41,7 @@ export interface IShortcutItemProps {
   clearConflicts: Function;
   errorSize: string;
   contextMenu: Function;
-  app: JupyterLab;
+  app: JupyterFrontEnd;
 }
 
 /** State for ShortcutItem component */

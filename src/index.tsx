@@ -85,6 +85,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     menu: IMainMenu,
     restorer: ILayoutRestorer | null
   ): void => {
+    let widget: ShortcutWidget;
     /** Load keyboard shortcut settings from registry and create list of command id's */
     settingRegistry
       .load('@jupyterlab/shortcuts-extension:plugin')
@@ -102,7 +103,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
         app.commands.addCommand(command, {
           label: 'Keyboard Shortcut Editor',
           execute: () => {
-            const widget: ShortcutWidget = createWidget(commandlist, settingRegistry, app);
+            if (widget == undefined) {
+              widget = createWidget(commandlist, settingRegistry, app);
+            }
 
             if (!tracker.has(widget)) {
               // Track the state of the widget for later restoration

@@ -78,28 +78,29 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/jupyterlab-shortcutui:plugin',
   requires: [ISettingRegistry, ICommandPalette, IMainMenu],
   optional: [ILayoutRestorer],
-  activate: async (
+  activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
     palette: ICommandPalette,
     menu: IMainMenu,
     restorer: ILayoutRestorer | null
-  ): Promise<void> => {
+  ): void => {
     const command: string = 'shortcutui:open-ui';
     let widget: MainAreaWidget<ShortcutWidget>;
     // Track and restore the widget state
     const tracker = new WidgetTracker<MainAreaWidget<ShortcutWidget>>({
       namespace: 'shortcutui'
     });
-    /** Load keyboard shortcut settings from registry and create list of command id's */
-    const shortCutsFromRegistry = await settingRegistry.load('@jupyterlab/shortcuts-extension:plugin')
-    const shortCutsList = Object.keys(shortCutsFromRegistry.composite)
      
     /** Add command to open extension's widget */
     app.commands.addCommand(command, {
       label: 'Keyboard Shortcut Editor',
-      execute: () => {
-        if (widget == undefined) {
+      execute: async () => {
+        if (widget == undefined || !widget.isAttached) {
+          /** Load keyboard shortcut settings from registry and create list of command id's */
+          const shortCutsFromRegistry = 
+            await settingRegistry.load('@jupyterlab/shortcuts-extension:plugin');
+          const shortCutsList = Object.keys(shortCutsFromRegistry.composite);
           widget = createWidget(shortCutsList, settingRegistry, app);
         }
 
@@ -109,7 +110,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         }
         if (!widget.isAttached) {
           /** Attach the widget to the main work area if it's not there */
-          app.shell.add(widget as Widget, 'main');
+          app.shell.add(widget as Widget);
         } else {
           widget.update();
         }

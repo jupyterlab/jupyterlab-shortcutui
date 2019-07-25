@@ -26,7 +26,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib",
-    "prettier": "prettier --write 'src/**'",
+    "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "watch": "tsc -w"
   },
   "dependencies": {
@@ -45,6 +45,8 @@
     "@types/react-dom": "~16.0.5",
     "prettier": "^1.18.2",
     "rimraf": "^2.6.1",
+    "tslint": "^5.18.0",
+    "tslint-plugin-prettier": "^2.0.1",
     "typescript": "~3.5.3"
   },
   "jupyterlab": {

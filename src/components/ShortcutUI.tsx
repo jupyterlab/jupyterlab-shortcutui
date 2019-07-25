@@ -515,22 +515,22 @@ export class ShortcutUI extends React.Component<
     this.setState({ filteredShortcutList: shortcutList });
   };
 
-  contextMenu = (
-    event: any,
-    commandIDs: string[]
-  ) => {
-    event.persist()
-    const { commands } = this.props.app
-    this.setState({
-      contextMenu: new Menu({ commands })
-    }, () => {
-      event.preventDefault()
-      for (let command of commandIDs) {
-        this.state.contextMenu.addItem( {command: command } )
+  contextMenu = (event: any, commandIDs: string[]) => {
+    event.persist();
+    const { commands } = this.props.app;
+    this.setState(
+      {
+        contextMenu: new Menu({ commands })
+      },
+      () => {
+        event.preventDefault();
+        for (let command of commandIDs) {
+          this.state.contextMenu.addItem({ command: command });
+        }
+        this.state.contextMenu.open(event.clientX, event.clientY);
       }
-      this.state.contextMenu.open(event.clientX, event.clientY)
-    })
-  }
+    );
+  };
 
   render() {
     if (!this.state.shortcutsFetched) {

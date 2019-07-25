@@ -8,7 +8,7 @@ export const TopWhitespaceStyle = style({
   zIndex: 2,
   width: '100%',
   background: 'var(--jp-toolbar-background)',
-  position: 'relative',
+  position: 'relative'
 });
 
 export const ShortcutUIStyle = style({
@@ -17,5 +17,5 @@ export const ShortcutUIStyle = style({
   fontSize: 'var(--jp-ui-font-size1)',
   fontFamily: 'var(--jp-ui-font-family)',
   color: 'var(--jp-content-font-color1)',
-  minWidth: '450px',
-})
+  minWidth: '450px'
+});

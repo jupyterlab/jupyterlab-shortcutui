@@ -67,14 +67,15 @@ export class ShortcutItem extends React.Component<
   IShortcutItemState
 > {
   constructor(props: any) {
-    super(props)
+    super(props);
 
     this.state = {
       displayNewInput: false,
       displayReplaceInputLeft: false,
       displayReplaceInputRight: false,
-      numShortcuts: Object.keys(this.props.shortcut.keys)
-        .filter(key => this.props.shortcut.keys[key][0] !== '').length
+      numShortcuts: Object.keys(this.props.shortcut.keys).filter(
+        key => this.props.shortcut.keys[key][0] !== ''
+      ).length
     };
   }
 
@@ -98,92 +99,100 @@ export class ShortcutItem extends React.Component<
   };
 
   private handleRightClick = (e: any): void => {
-    const key = this.props.shortcut.commandName + '_' + this.props.shortcut.selector
+    const key =
+      this.props.shortcut.commandName + '_' + this.props.shortcut.selector;
 
-    if(!this.props.app.commands.hasCommand(CommandIDs.shortcutEdit + key)) {
+    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutEdit + key)) {
       this.props.app.commands.addCommand(CommandIDs.shortcutEdit + key, {
-        label: "Edit",
-        caption: "Edit existing sortcut",
+        label: 'Edit',
+        caption: 'Edit existing sortcut',
         execute: () => {
           this.toggleInputReplaceLeft();
         }
-      })
+      });
     }
-    if(!this.props.app.commands.hasCommand(CommandIDs.shortcutEditLeft + key)) {
+    if (
+      !this.props.app.commands.hasCommand(CommandIDs.shortcutEditLeft + key)
+    ) {
       this.props.app.commands.addCommand(CommandIDs.shortcutEditLeft + key, {
-      label: 'Edit First',
-      caption: 'Edit existing shortcut',
-      execute: () => {
-        this.toggleInputReplaceLeft()
-      }
-    })}
-    if(!this.props.app.commands.hasCommand(CommandIDs.shortcutEditRight + key)){
+        label: 'Edit First',
+        caption: 'Edit existing shortcut',
+        execute: () => {
+          this.toggleInputReplaceLeft();
+        }
+      });
+    }
+    if (
+      !this.props.app.commands.hasCommand(CommandIDs.shortcutEditRight + key)
+    ) {
       this.props.app.commands.addCommand(CommandIDs.shortcutEditRight + key, {
-        label: "Edit Second",
-        caption: "Edit existing shortcut",
+        label: 'Edit Second',
+        caption: 'Edit existing shortcut',
         execute: () => {
           this.toggleInputReplaceRight();
         }
-      })
+      });
     }
-    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutAddNew + key)){
+    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutAddNew + key)) {
       this.props.app.commands.addCommand(CommandIDs.shortcutAddNew + key, {
         label: 'Add',
         caption: 'Add new shortcut',
         execute: () => {
-          this.toggleInputNew()
+          this.toggleInputNew();
         }
-      })
+      });
     }
-    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutAddAnother + key)){
+    if (
+      !this.props.app.commands.hasCommand(CommandIDs.shortcutAddAnother + key)
+    ) {
       this.props.app.commands.addCommand(CommandIDs.shortcutAddAnother + key, {
         label: 'Add',
         caption: 'Add another shortcut',
         execute: () => {
-          this.toggleInputNew()
+          this.toggleInputNew();
         }
-      })
+      });
     }
-    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutReset + key)){
+    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutReset + key)) {
       this.props.app.commands.addCommand(CommandIDs.shortcutReset + key, {
         label: 'Reset',
         caption: 'Reset shortcut back to default',
         execute: () => {
-          this.props.resetShortcut(this.props.shortcut)
+          this.props.resetShortcut(this.props.shortcut);
         }
-      })
+      });
     }
 
-    this.setState({
-      numShortcuts: Object.keys(this.props.shortcut.keys)
-        .filter(key => this.props.shortcut.keys[key][0] !== '').length
-    }, () => {
-      let commandList = []
-      if (this.state.numShortcuts == 2){
-        commandList = commandList.concat([
-          CommandIDs.shortcutEditLeft + key, 
-          CommandIDs.shortcutEditRight + key, 
-        ])  
-      } else if (this.state.numShortcuts == 1) {
-        commandList = commandList.concat([
-          CommandIDs.shortcutEdit + key, 
-          CommandIDs.shortcutAddAnother + key, 
-        ])
-      } else {
-        commandList = commandList.concat([
-          CommandIDs.shortcutAddNew + key, 
-        ])
-      }
+    this.setState(
+      {
+        numShortcuts: Object.keys(this.props.shortcut.keys).filter(
+          key => this.props.shortcut.keys[key][0] !== ''
+        ).length
+      },
+      () => {
+        let commandList = [];
+        if (this.state.numShortcuts == 2) {
+          commandList = commandList.concat([
+            CommandIDs.shortcutEditLeft + key,
+            CommandIDs.shortcutEditRight + key
+          ]);
+        } else if (this.state.numShortcuts == 1) {
+          commandList = commandList.concat([
+            CommandIDs.shortcutEdit + key,
+            CommandIDs.shortcutAddAnother + key
+          ]);
+        } else {
+          commandList = commandList.concat([CommandIDs.shortcutAddNew + key]);
+        }
 
-      if(this.props.shortcut.source === 'Custom') {
-        commandList = commandList.concat([
-          CommandIDs.shortcutReset + key
-        ])
-      }
+        if (this.props.shortcut.source === 'Custom') {
+          commandList = commandList.concat([CommandIDs.shortcutReset + key]);
+        }
 
-      this.props.contextMenu(e, commandList)
-    })
-  }
+        this.props.contextMenu(e, commandList);
+      }
+    );
+  };
 
   /** Transform special key names into unicode characters */
   toSymbols = (value: string): string => {
@@ -240,10 +249,11 @@ export class ShortcutItem extends React.Component<
       );
     } else {
       return (
-        <div className={RowStyle}
+        <div
+          className={RowStyle}
           onContextMenu={e => {
-            e.persist()
-            this.handleRightClick(e)
+            e.persist();
+            this.handleRightClick(e);
           }}
         >
           <div className={CellStyle}>{this.props.shortcut.category}</div>
@@ -251,12 +261,15 @@ export class ShortcutItem extends React.Component<
             <div className="jp-label">{this.props.shortcut.label}</div>
           </div>
           <div className={CellStyle}>
-            <div className={nonEmptyKeys.length === 0 
-              ? classes(ShortcutCellStyle, EmptyShortcutCellStyle)
-              : (nonEmptyKeys.length === 1 
-                ? classes(ShortcutCellStyle, SingleShortcutCellStyle)
-                : ShortcutCellStyle
-              )}>
+            <div
+              className={
+                nonEmptyKeys.length === 0
+                  ? classes(ShortcutCellStyle, EmptyShortcutCellStyle)
+                  : nonEmptyKeys.length === 1
+                  ? classes(ShortcutCellStyle, SingleShortcutCellStyle)
+                  : ShortcutCellStyle
+              }
+            >
               {nonEmptyKeys.map((key, index) => (
                 <div
                   className={ShortcutContainerStyle}
@@ -314,23 +327,29 @@ export class ShortcutItem extends React.Component<
                       )}
                     />
                   )}
-                  {index === 0 && 
-                    <div className={
-                        nonEmptyKeys.length == 2 || this.state.displayNewInput 
-                        ? OrTwoStyle 
-                        : OrStyle
+                  {index === 0 && (
+                    <div
+                      className={
+                        nonEmptyKeys.length == 2 || this.state.displayNewInput
+                          ? OrTwoStyle
+                          : OrStyle
                       }
-                      id={nonEmptyKeys.length == 2 ? 'secondor': (
-                        this.state.displayReplaceInputLeft ? 'noor' :'or')}
+                      id={
+                        nonEmptyKeys.length == 2
+                          ? 'secondor'
+                          : this.state.displayReplaceInputLeft
+                          ? 'noor'
+                          : 'or'
+                      }
                     >
                       or
                     </div>
-                  }
+                  )}
                 </div>
               ))}
 
               {nonEmptyKeys.length === 1 &&
-                !this.state.displayNewInput && 
+                !this.state.displayNewInput &&
                 !this.state.displayReplaceInputLeft && (
                   <a
                     className={!this.state.displayNewInput ? PlusStyle : ''}
@@ -342,18 +361,17 @@ export class ShortcutItem extends React.Component<
                     Add
                   </a>
                 )}
-              {nonEmptyKeys.length === 0 &&
-                !this.state.displayNewInput && (
-                  <a
-                    className={!this.state.displayNewInput ? PlusStyle : ''}
-                    onClick={() => {
-                      this.toggleInputNew(), this.props.clearConflicts();
-                    }}
-                    id="add-link"
-                  >
-                    Add
-                  </a>
-                )}
+              {nonEmptyKeys.length === 0 && !this.state.displayNewInput && (
+                <a
+                  className={!this.state.displayNewInput ? PlusStyle : ''}
+                  onClick={() => {
+                    this.toggleInputNew(), this.props.clearConflicts();
+                  }}
+                  id="add-link"
+                >
+                  Add
+                </a>
+              )}
 
               {/** Display input box when toggled */}
               {this.state.displayNewInput && (

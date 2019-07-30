@@ -19,6 +19,7 @@ import { Widget } from '@phosphor/widgets';
 import ShortcutWidget from './ShortcutWidget';
 
 import '../style/variables.css';
+import { ReadonlyJSONArray } from '@phosphor/coreutils';
 
 /** Object for shortcut items */
 export class ShortcutObject {
@@ -98,7 +99,7 @@ function activate(
   restorer: ILayoutRestorer | null
 ): void {
   const command = 'shortcutui:open-ui';
-  const pluginLocation = '@jupyterlab/shortcuts-extension:plugin';
+  const pluginLocation = '@jupyterlab/shortcuts-extension:shortcuts';
   const label = 'Keyboard Shortcut Editor';
   let widget: MainAreaWidget<ShortcutWidget>;
   // Track and restore the widget state
@@ -115,7 +116,14 @@ function activate(
         const shortCutsFromRegistry = await settingRegistry.load(
           pluginLocation
         );
-        const shortCutsList = Object.keys(shortCutsFromRegistry.composite);
+        const shortCutsListJson = shortCutsFromRegistry.composite
+          .shortcuts as ReadonlyJSONArray;
+        const shortCutsList = [];
+        if (shortCutsListJson) {
+          for (var index in shortCutsListJson) {
+            shortCutsList.push(shortCutsListJson[index]['command']);
+          }
+        }
         widget = createWidget(
           shortCutsList,
           settingRegistry,

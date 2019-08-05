@@ -197,11 +197,8 @@ function getShortcutObjects(
   let shortcutObjects: { [index: string]: ShortcutObject } = {};
   shortcuts.forEach((shortcut: any) => {
     let key = shortcut.command + '_' + shortcut.selector;
-    if (shortcut.command === 'application:activate-next-tab') {
-      console.log('Coming from composite ' + shortcut.keys);
-    }
     if (Object.keys(shortcutObjects).indexOf(key) !== -1) {
-      var currentCount = shortcutObjects[key].numberOfShortcuts;
+      let currentCount = shortcutObjects[key].numberOfShortcuts;
       shortcutObjects[key].keys[currentCount] = shortcut.keys;
       shortcutObjects[key].numberOfShortcuts++;
     } else {
@@ -269,7 +266,7 @@ export class ShortcutUI extends React.Component<
 
   /** Fetch shortcut list on mount */
   componentDidMount(): void {
-    this._refreshShortcutList();
+    void this._refreshShortcutList();
   }
 
   /** Flag all user-set shortcuts as custom */
@@ -350,7 +347,7 @@ export class ShortcutUI extends React.Component<
     for (const key of Object.keys(settings.user)) {
       await this.props.settingRegistry.remove(this.props.shortcutPlugin, key);
     }
-    this._refreshShortcutList();
+    await this._refreshShortcutList();
   };
 
   /** Set new shortcut for command, refresh state */
@@ -360,8 +357,8 @@ export class ShortcutUI extends React.Component<
     );
     const userShortcuts = shortCuts.user.shortcuts as ReadonlyJSONArray;
     const newUserShortcuts = [];
-    var found = false;
-    for (var shortcut in userShortcuts.values()) {
+    let found = false;
+    for (let shortcut in userShortcuts.values()) {
       if (
         shortcut['command'] === shortcutObject.commandName &&
         shortcut['selector'] === shortcutObject.selector
@@ -384,8 +381,8 @@ export class ShortcutUI extends React.Component<
         keys: keys
       });
     }
-    shortCuts.set('shortcuts', newUserShortcuts);
-    this._refreshShortcutList();
+    await shortCuts.set('shortcuts', newUserShortcuts);
+    await this._refreshShortcutList();
   };
 
   /** Delete shortcut for command, refresh state */
@@ -394,7 +391,7 @@ export class ShortcutUI extends React.Component<
     shortcutId: string
   ) => {
     await this.handleUpdate(shortcutObject, ['']);
-    this._refreshShortcutList();
+    await this._refreshShortcutList();
   };
 
   /** Reset a specific shortcut to its default settings */
@@ -404,7 +401,7 @@ export class ShortcutUI extends React.Component<
     );
     const userShortcuts = shortCuts.user.shortcuts as ReadonlyJSONArray;
     const newUserShortcuts = [];
-    for (var shortcut in userShortcuts.values()) {
+    for (let shortcut in userShortcuts.values()) {
       if (
         shortcut['command'] !== shortcutObject.commandName ||
         shortcut['selector'] !== shortcutObject.selector
@@ -412,13 +409,13 @@ export class ShortcutUI extends React.Component<
         newUserShortcuts.push(shortcut);
       }
     }
-    shortCuts.set('shortcuts', newUserShortcuts);
-    this._refreshShortcutList();
+    await shortCuts.set('shortcuts', newUserShortcuts);
+    await this._refreshShortcutList();
   };
 
   /** Opens advanced setting registry */
   openAdvanced = (): void => {
-    this.props.commandRegistry.execute('settingeditor:open');
+    void this.props.commandRegistry.execute('settingeditor:open');
   };
 
   /** Toggles showing command selectors */

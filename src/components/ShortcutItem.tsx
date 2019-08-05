@@ -215,33 +215,31 @@ export class ShortcutItem extends React.Component<
 
   getErrorRow(): JSX.Element {
     return (
-      <tr className={classes(RowStyle)}>
-        <td colSpan={this.props.showSelectors ? 5 : 4}>
-          <div
-            className={ConflictContainerStyle(
-              this.props.showSelectors,
-              this.props.errorSize
-            )}
-          >
-            <div className={ErrorMessageStyle}>
-              {'Shortcut already in use by ' +
-                (this.props.shortcut as ErrorObject).takenBy.takenByLabel +
-                '. Overwrite it?'}
-            </div>
-            <div className={ErrorButtonStyle}>
-              <button>Cancel</button>
-              <button
-                id="no-blur"
-                onClick={() => {
-                  document.getElementById('overwrite').click();
-                }}
-              >
-                Overwrite
-              </button>
-            </div>
+      <div className={classes(RowStyle)}>
+        <div
+          className={ConflictContainerStyle(
+            this.props.showSelectors,
+            this.props.errorSize
+          )}
+        >
+          <div className={ErrorMessageStyle}>
+            {'Shortcut already in use by ' +
+              (this.props.shortcut as ErrorObject).takenBy.takenByLabel +
+              '. Overwrite it?'}
           </div>
-        </td>
-      </tr>
+          <div className={ErrorButtonStyle}>
+            <button>Cancel</button>
+            <button
+              id="no-blur"
+              onClick={() => {
+                document.getElementById('overwrite').click();
+              }}
+            >
+              Overwrite
+            </button>
+          </div>
+        </div>
+      </div>
     );
   }
 

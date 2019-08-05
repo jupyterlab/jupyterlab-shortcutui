@@ -91,14 +91,13 @@ export class ShortcutInput extends React.Component<
 
   /** Parse user input for chained shortcuts */
   parseChaining = (
-    event: any,
+    event: React.KeyboardEvent,
     value: string,
     userInput: string,
     keys: Array<string>,
     currentChain: string
   ): Array<any> => {
-    event.preventDefault();
-    let key = EN_US.keyForKeydownEvent(event);
+    let key = EN_US.keyForKeydownEvent(event.nativeEvent);
 
     const modKeys = ['Shift', 'Control', 'Alt', 'Meta', 'Ctrl', 'Accel'];
 
@@ -296,7 +295,9 @@ export class ShortcutInput extends React.Component<
   }
 
   /** Parse and normalize user input */
-  handleInput = (event: any): void => {
+  handleInput = (event: React.KeyboardEvent): void => {
+    event.preventDefault();
+    event.nativeEvent.stopImmediatePropagation();
     this.setState({ selected: false });
     const parsed = this.parseChaining(
       event,

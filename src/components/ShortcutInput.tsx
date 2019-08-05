@@ -297,7 +297,6 @@ export class ShortcutInput extends React.Component<
   /** Parse and normalize user input */
   handleInput = (event: React.KeyboardEvent): void => {
     event.preventDefault();
-    event.nativeEvent.stopImmediatePropagation();
     this.setState({ selected: false });
     const parsed = this.parseChaining(
       event,

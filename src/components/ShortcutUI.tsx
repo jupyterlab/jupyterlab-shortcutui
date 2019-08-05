@@ -352,23 +352,22 @@ export class ShortcutUI extends React.Component<
 
   /** Set new shortcut for command, refresh state */
   handleUpdate = async (shortcutObject: ShortcutObject, keys: string[]) => {
-    const shortCuts: ISettingRegistry.ISettings = await this.props.settingRegistry.reload(
+    const settings: ISettingRegistry.ISettings = await this.props.settingRegistry.reload(
       this.props.shortcutPlugin
     );
-    const userShortcuts = shortCuts.user.shortcuts as ReadonlyJSONArray;
+    const userShortcuts = settings.user.shortcuts as ReadonlyJSONArray;
     const newUserShortcuts = [];
     let found = false;
-    for (let shortcut in userShortcuts.values()) {
+    for (let shortcut of userShortcuts) {
       if (
         shortcut['command'] === shortcutObject.commandName &&
         shortcut['selector'] === shortcutObject.selector
       ) {
-        const newShortCut = {
+        newUserShortcuts.push({
           command: shortcut['command'],
           selector: shortcut['selector'],
           keys: keys
-        };
-        newUserShortcuts.push(newShortCut);
+        });
         found = true;
       } else {
         newUserShortcuts.push(shortcut);
@@ -381,7 +380,7 @@ export class ShortcutUI extends React.Component<
         keys: keys
       });
     }
-    await shortCuts.set('shortcuts', newUserShortcuts);
+    await settings.set('shortcuts', newUserShortcuts);
     await this._refreshShortcutList();
   };
 
@@ -396,12 +395,12 @@ export class ShortcutUI extends React.Component<
 
   /** Reset a specific shortcut to its default settings */
   resetShortcut = async (shortcutObject: ShortcutObject) => {
-    const shortCuts: ISettingRegistry.ISettings = await this.props.settingRegistry.reload(
+    const settings: ISettingRegistry.ISettings = await this.props.settingRegistry.reload(
       this.props.shortcutPlugin
     );
-    const userShortcuts = shortCuts.user.shortcuts as ReadonlyJSONArray;
+    const userShortcuts = settings.user.shortcuts as ReadonlyJSONArray;
     const newUserShortcuts = [];
-    for (let shortcut in userShortcuts.values()) {
+    for (let shortcut of userShortcuts) {
       if (
         shortcut['command'] !== shortcutObject.commandName ||
         shortcut['selector'] !== shortcutObject.selector
@@ -409,7 +408,7 @@ export class ShortcutUI extends React.Component<
         newUserShortcuts.push(shortcut);
       }
     }
-    await shortCuts.set('shortcuts', newUserShortcuts);
+    await settings.set('shortcuts', newUserShortcuts);
     await this._refreshShortcutList();
   };
 

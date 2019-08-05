@@ -193,13 +193,17 @@ function getShortcutObjects(
   commands: CommandRegistry,
   shortcutsObj: ISettingRegistry.ISettings
 ): { [index: string]: ShortcutObject } {
-  const shortcuts: any = shortcutsObj.composite.shortcuts;
+  const shortcuts = shortcutsObj.composite.shortcuts as ReadonlyJSONArray;
   let shortcutObjects: { [index: string]: ShortcutObject } = {};
   shortcuts.forEach((shortcut: any) => {
     let key = shortcut.command + '_' + shortcut.selector;
+    if (shortcut.command === 'application:activate-next-tab') {
+      console.log('Coming from composite ' + shortcut.keys);
+    }
     if (Object.keys(shortcutObjects).indexOf(key) !== -1) {
-      shortcutObjects[key].keys[shortcut.command] = shortcut.keys;
-      shortcutObjects[key].numberOfShortcuts = 2;
+      var currentCount = shortcutObjects[key].numberOfShortcuts;
+      shortcutObjects[key].keys[currentCount] = shortcut.keys;
+      shortcutObjects[key].numberOfShortcuts++;
     } else {
       let shortcutObject = new ShortcutObject();
       shortcutObject.commandName = shortcut.command;
@@ -209,10 +213,10 @@ function getShortcutObjects(
       }
       shortcutObject.label = label;
       shortcutObject.category = shortcut.command.split(':')[0];
-      shortcutObject.keys[shortcut.command] = shortcut.keys;
+      shortcutObject.keys[0] = shortcut.keys;
       shortcutObject.selector = shortcut.selector;
       shortcutObject.source = 'Default';
-      shortcutObject.id = shortcut.command;
+      shortcutObject.id = key;
       shortcutObject.numberOfShortcuts = 1;
       shortcutObjects[key] = shortcutObject;
     }
@@ -226,19 +230,11 @@ function getKeyBindingsUsed(shortcutObjects: {
   [index: string]: ShortcutObject;
 }): { [index: string]: TakenByObject } {
   let keyBindingsUsed: { [index: string]: TakenByObject } = {};
+
   Object.keys(shortcutObjects).forEach((shortcut: string) => {
-    Object.keys(shortcutObjects[shortcut].keys).forEach((key: string) => {
-      const takenBy = new TakenByObject();
+    Object.keys(shortcutObjects[shortcut].keys).forEach((key: any) => {
+      const takenBy = new TakenByObject(shortcutObjects[shortcut]);
       takenBy.takenByKey = key;
-      takenBy.takenByLabel =
-        shortcutObjects[shortcut].category +
-        ': ' +
-        shortcutObjects[shortcut].label;
-      takenBy.takenBy = shortcutObjects[shortcut];
-      takenBy.id =
-        shortcutObjects[shortcut].selector +
-        '_' +
-        shortcutObjects[shortcut].commandName;
 
       keyBindingsUsed[
         shortcutObjects[shortcut].keys[key].join(' ') +

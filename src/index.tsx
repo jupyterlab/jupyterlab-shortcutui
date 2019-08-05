@@ -74,11 +74,18 @@ export class TakenByObject {
   takenByLabel: string;
   id: string;
 
-  constructor() {
-    this.takenBy = new ShortcutObject();
-    this.takenByKey = '';
-    this.takenByLabel = '';
-    this.id = '';
+  constructor(shortcut?: ShortcutObject) {
+    if (shortcut) {
+      this.takenBy = shortcut;
+      this.takenByKey = '';
+      this.takenByLabel = shortcut.category + ': ' + shortcut.label;
+      this.id = shortcut.commandName + '_' + shortcut.selector;
+    } else {
+      this.takenBy = new ShortcutObject();
+      this.takenByKey = '';
+      this.takenByLabel = '';
+      this.id = '';
+    }
   }
 }
 

@@ -21,11 +21,11 @@ export const EmptyShortcutCellStyle = style({
       //marginLeft: 'auto'
     }
   }
-})
+});
 
 export const SingleShortcutCellStyle = style({
   //justifyContent: 'space-between'
-})
+});
 
 export const RowStyle = style({
   padding: '10px',
@@ -40,7 +40,7 @@ export const RowStyle = style({
   $nest: {
     '&:hover #shortcut-keys': {
       borderColor: 'var(--jp-border-color1)',
-      background: 'var(--jp-layout-color2)',
+      background: 'var(--jp-layout-color2)'
     },
     '&:hover #add-link': {
       display: 'block'
@@ -51,41 +51,38 @@ export const RowStyle = style({
   }
 });
 
-export function ConflictContainerStyle(showSelectors: boolean, errorSize: string) {
+export function ConflictContainerStyle(
+  showSelectors: boolean,
+  errorSize: string
+) {
   if (showSelectors && errorSize === 'regular') {
-    return (
-      style({
-        display: 'flex',
-        flexWrap: 'wrap',
-        padding: '6px 12px',
-        marginLeft: '20%'
-      })
-    )
+    return style({
+      display: 'flex',
+      flexWrap: 'wrap',
+      padding: '6px 12px',
+      marginLeft: '20%'
+    });
   } else if (!showSelectors && errorSize === 'regular') {
-    return (
-      style({
-        display: 'flex',
-        flexWrap: 'wrap',
-        padding: '6px 12px',
-        marginLeft: '25%'
-      })
-    )
+    return style({
+      display: 'flex',
+      flexWrap: 'wrap',
+      padding: '6px 12px',
+      marginLeft: '25%'
+    });
   } else {
-    return (
-      style({
-        display: 'flex',
-        flexWrap: 'wrap',
-        padding: '6px 12px',
-        marginLeft: '0'
-      })
-    )
+    return style({
+      display: 'flex',
+      flexWrap: 'wrap',
+      padding: '6px 12px',
+      marginLeft: '0'
+    });
   }
 }
 
 export const ErrorMessageStyle = style({
   color: 'var(--jp-error-color1)',
   marginTop: '9px'
-})
+});
 
 export const ErrorButtonStyle = style({
   lineHeight: '34px',
@@ -100,9 +97,7 @@ export const ErrorButtonStyle = style({
       outline: 'none',
 
       $nest: {
-        '&:hover': {
-
-        },
+        '&:hover': {},
         '&:active': {
           outline: 'none',
           border: 'none'
@@ -120,9 +115,7 @@ export const ErrorButtonStyle = style({
       outline: 'none',
 
       $nest: {
-        '&:hover': {
-
-        },
+        '&:hover': {},
         '&:active': {
           outline: 'none',
           border: 'none'
@@ -134,8 +127,7 @@ export const ErrorButtonStyle = style({
       }
     }
   }
-
-})
+});
 
 export const ShortcutContainerStyle = style({
   display: 'flex',
@@ -183,8 +175,8 @@ export const OrTwoStyle = style({
   marginLeft: '12px',
   marginTop: '8px',
   color: 'var(--jp-content-font-color3)',
-  display: 'block',
-})
+  display: 'block'
+});
 
 export const CommaStyle = style({
   marginTop: '10px',
@@ -215,10 +207,10 @@ export const PlusStyle = style({
 
   $nest: {
     '&:hover': {
-      backgroundColor: 'var(--jp-brand-color2)',
+      backgroundColor: 'var(--jp-brand-color2)'
     },
     '&:active': {
-      backgroundColor: 'var(--jp-brand-color2)',
+      backgroundColor: 'var(--jp-brand-color2)'
     }
   }
 });

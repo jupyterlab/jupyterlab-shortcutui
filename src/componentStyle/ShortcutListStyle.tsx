@@ -16,5 +16,5 @@ export function ShortcutListContainerStyle(
     borderTop: 'solid',
     borderTopColor: 'var(--jp-border-color1)',
     borderTopWidth: 'var(--jp-border-width)'
-  })
+  });
 }

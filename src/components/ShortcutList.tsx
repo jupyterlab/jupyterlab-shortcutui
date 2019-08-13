@@ -2,7 +2,7 @@ import { ShortcutItem } from './ShortcutItem';
 
 import { ShortcutObject, TakenByObject } from '..';
 
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import * as React from 'react';
 
@@ -26,7 +26,7 @@ export interface IShortcutListProps {
   height: number;
   errorSize: string;
   contextMenu: Function;
-  app: JupyterLab;
+  app: JupyterFrontEnd;
 }
 
 /** React component for list of shortcuts */

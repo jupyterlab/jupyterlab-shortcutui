@@ -1,8 +1,16 @@
-import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
+import {
+  ILayoutRestorer,
+  JupyterFrontEndPlugin,
+  JupyterFrontEnd
+} from '@jupyterlab/application';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-import { ICommandPalette, VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+import {
+  ICommandPalette,
+  MainAreaWidget,
+  WidgetTracker
+} from '@jupyterlab/apputils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
@@ -11,6 +19,7 @@ import { Widget } from '@phosphor/widgets';
 import ShortcutWidget from './ShortcutWidget';
 
 import '../style/variables.css';
+import { ReadonlyJSONArray } from '@phosphor/coreutils';
 
 /** Object for shortcut items */
 export class ShortcutObject {
@@ -65,73 +74,125 @@ export class TakenByObject {
   takenByLabel: string;
   id: string;
 
-  constructor() {
-    this.takenBy = new ShortcutObject();
-    this.takenByKey = '';
-    this.takenByLabel = '';
-    this.id = '';
+  constructor(shortcut?: ShortcutObject) {
+    if (shortcut) {
+      this.takenBy = shortcut;
+      this.takenByKey = '';
+      this.takenByLabel = shortcut.category + ': ' + shortcut.label;
+      this.id = shortcut.commandName + '_' + shortcut.selector;
+    } else {
+      this.takenBy = new ShortcutObject();
+      this.takenByKey = '';
+      this.takenByLabel = '';
+      this.id = '';
+    }
   }
 }
 
 /** Main plugin for extension */
-const plugin: JupyterLabPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/jupyterlab-shortcutui:plugin',
   requires: [ISettingRegistry, ICommandPalette, IMainMenu],
-  activate: (
-    app: JupyterLab,
-    settingRegistry: ISettingRegistry,
-    palette: ICommandPalette,
-    menu: IMainMenu
-  ): void => {
-    /** Load keyboard shortcut settings from registry and create list of command id's */
-    settingRegistry
-      .load('@jupyterlab/shortcuts-extension:plugin')
-      .then(settings => Object.keys(settings.composite))
-
-      /** Create top-level component and associated widget */
-      .then(commandlist => {
-        const widget: VDomRenderer<VDomModel> = new ShortcutWidget(
-          -1,
-          -1,
-          commandlist,
-          settingRegistry,
-          app.commands,
-          '@jupyterlab/shortcuts-extension:plugin',
-          app
-        );
-
-        widget.id = 'jupyterlab-shortcutui';
-        widget.title.label = 'Keyboard Shortcut Editor';
-        widget.title.closable = true;
-
-        /** Add command to open extension's widget */
-        const command: string = 'shortcutui:open-ui';
-        app.commands.addCommand(command, {
-          label: 'Keyboard Shortcut Editor',
-          execute: () => {
-            if (!widget.isAttached) {
-              /** Attach the widget to the main work area if it's not there */
-              app.shell.addToMainArea(widget as Widget);
-            } else {
-              widget.update();
-            }
-            /** Activate the widget */
-            app.shell.activateById(widget.id);
-          }
-        });
-
-        /** Add command to command palette */
-        palette.addItem({ command, category: 'Settings' });
-
-        /** Add command to settings menu */
-        menu.settingsMenu.addGroup([{ command: command }], 999);
-
-        /** Add command to help menu */
-        menu.helpMenu.addGroup([{ command: command }], 7);
-      });
-  },
+  optional: [ILayoutRestorer],
+  activate: activate,
   autoStart: true
 };
+
+function activate(
+  app: JupyterFrontEnd,
+  settingRegistry: ISettingRegistry,
+  palette: ICommandPalette,
+  menu: IMainMenu,
+  restorer: ILayoutRestorer | null
+): void {
+  const command = 'shortcutui:open-ui';
+  const pluginLocation = '@jupyterlab/shortcuts-extension:shortcuts';
+  const label = 'Keyboard Shortcut Editor';
+  let widget: MainAreaWidget<ShortcutWidget>;
+  // Track and restore the widget state
+  const tracker = new WidgetTracker<MainAreaWidget<ShortcutWidget>>({
+    namespace: 'shortcutui'
+  });
+
+  /** Add command to open extension's widget */
+  app.commands.addCommand(command, {
+    label: label,
+    execute: async () => {
+      if (widget == undefined || !widget.isAttached) {
+        /** Load keyboard shortcut settings from registry and create list of command id's */
+        const shortCutsFromRegistry = await settingRegistry.load(
+          pluginLocation
+        );
+        const shortCutsListJson = shortCutsFromRegistry.composite
+          .shortcuts as ReadonlyJSONArray;
+        const shortCutsList = [];
+        if (shortCutsListJson) {
+          for (var index in shortCutsListJson) {
+            shortCutsList.push(shortCutsListJson[index]['command']);
+          }
+        }
+        widget = createWidget(
+          shortCutsList,
+          settingRegistry,
+          app,
+          pluginLocation,
+          label
+        );
+      }
+
+      if (!tracker.has(widget)) {
+        // Track the state of the widget for later restoration
+        tracker.add(widget);
+      }
+      if (!widget.isAttached) {
+        /** Attach the widget to the main work area if it's not there */
+        app.shell.add(widget as Widget);
+      } else {
+        widget.update();
+      }
+      /** Activate the widget */
+      app.shell.activateById(widget.id);
+    }
+  });
+
+  /** Add command to command palette */
+  palette.addItem({ command, category: 'Settings' });
+
+  /** Add command to settings menu */
+  menu.settingsMenu.addGroup([{ command: command }], 999);
+
+  /** Add command to help menu */
+  menu.helpMenu.addGroup([{ command: command }], 7);
+
+  if (restorer) {
+    restorer.restore(tracker, {
+      command,
+      name: () => 'shortcutui'
+    });
+  }
+}
+
+function createWidget(
+  commandlist: string[],
+  settingRegistry: ISettingRegistry,
+  app: JupyterFrontEnd<JupyterFrontEnd.IShell>,
+  pluginLocation: string,
+  label: string
+): MainAreaWidget<ShortcutWidget> {
+  const widget: ShortcutWidget = new ShortcutWidget(
+    -1,
+    -1,
+    commandlist,
+    settingRegistry,
+    app.commands,
+    pluginLocation,
+    app
+  );
+  widget.id = 'jupyterlab-shortcutui';
+  widget.title.label = label;
+  widget.title.closable = true;
+  return new MainAreaWidget({ content: widget });
+}
 
 /** Export the plugin as default */
 export default plugin;

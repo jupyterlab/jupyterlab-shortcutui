@@ -4,7 +4,7 @@ import { classes } from 'typestyle';
 
 import { Menu } from '@phosphor/widgets';
 
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import {
   TopStyle,
@@ -207,7 +207,7 @@ export interface ITopNavProps {
   updateSort: Function;
   currentSort: string;
   width: number;
-  app: JupyterLab;
+  app: JupyterFrontEnd;
 }
 
 /** React component for top navigation */

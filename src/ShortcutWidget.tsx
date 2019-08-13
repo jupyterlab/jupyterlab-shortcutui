@@ -1,8 +1,8 @@
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
-import * as React from 'react'
+import * as React from 'react';
 
-import { JupyterLab } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { ShortcutUI } from './components/ShortcutUI';
 
@@ -21,20 +21,20 @@ export default class ShortcutWidget extends VDomRenderer<VDomModel> {
   settingRegistry: ISettingRegistry;
   shortcutPlugin: string;
   commandRegistry: CommandRegistry;
-  id: string;14
+  id: string;
   isAttached: boolean;
   title: Title<Widget>;
   reactComponent: React.ReactElement<any>;
-  app: JupyterLab
+  app: JupyterFrontEnd;
 
   constructor(
-    height: number, 
-    width: number, 
-    commandList: string[], 
+    height: number,
+    width: number,
+    commandList: string[],
     settingRegistry: ISettingRegistry,
     commandRegistry: CommandRegistry,
     shortcutPlugin: string,
-    app: JupyterLab
+    app: JupyterFrontEnd
   ) {
     super();
     this.height = height;
@@ -43,11 +43,11 @@ export default class ShortcutWidget extends VDomRenderer<VDomModel> {
     this.settingRegistry = settingRegistry;
     this.commandRegistry = commandRegistry;
     this.shortcutPlugin = shortcutPlugin;
-    this.app = app
+    this.app = app;
   }
 
   protected onUpdateRequest(): void {
-    this.reactComponent = 
+    this.reactComponent = (
       <ShortcutUI
         commandList={this.commandList}
         settingRegistry={this.settingRegistry}
@@ -57,20 +57,21 @@ export default class ShortcutWidget extends VDomRenderer<VDomModel> {
         width={this.width}
         app={this.app}
       />
+    );
     ReactDOM.render(
-      this.reactComponent, 
+      this.reactComponent,
       document.getElementById('jupyterlab-shortcutui')
-    )
+    );
     this.render();
   }
 
   protected onResize(msg: Widget.ResizeMessage): void {
     this.height = msg.height;
     this.width = msg.width;
-    super.update()
+    super.update();
   }
 
   render() {
-    return this.reactComponent
+    return this.reactComponent;
   }
 }

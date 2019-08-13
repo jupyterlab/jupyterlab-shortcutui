@@ -12,7 +12,7 @@ A JupyterLab extension for managing keyboard shortcuts
 
 ## Usage
 
-- Open the keyboard shortcuts editor from the *Settings* or *Help* menu
+- Open the keyboard shortcuts editor from the _Settings_ or _Help_ menu
 - Open the keyboard shortcuts editor from the command palette by searching for
   "Keyboard Shortcut Editor"
 

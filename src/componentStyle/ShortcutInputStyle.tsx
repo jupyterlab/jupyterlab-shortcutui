@@ -2,12 +2,12 @@ import { style, keyframes } from 'typestyle';
 
 export const InputBoxStyle = style({
   display: 'inline-flex',
-  paddingTop: '2px',
+  paddingTop: '2px'
 });
 
 export const InputBoxNewStyle = style({
   marginLeft: '10px'
-})
+});
 
 export const InputBoxHiddenStyle = style({
   display: 'hidden'
@@ -65,16 +65,16 @@ export const InputTextStyle = style({
   height: '17px',
   lineHeight: '17px',
   width: 'fit-content'
-})
+});
 
 export const InputSelectedTextStyle = style({
   backgroundColor: 'var(--jp-brand-color3)',
   overflow: 'hidden'
-})
+});
 
 export const InputWaitingStyle = style({
   color: 'var(--jp-content-font-color3)'
-})
+});
 
 export const SubmitStyle = style({
   background: 'var(--jp-brand-color1)',

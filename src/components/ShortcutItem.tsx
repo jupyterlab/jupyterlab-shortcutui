@@ -27,7 +27,7 @@ import {
   SourceCellStyle,
   ResetStyle
 } from '../componentStyle/ShortcutItemStyle';
-import { JupyterFrontEnd } from '@jupyterlab/application';
+import { IShortcutUIexternal } from '../ShortcutWidget';
 
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {
@@ -41,7 +41,7 @@ export interface IShortcutItemProps {
   clearConflicts: Function;
   errorSize: string;
   contextMenu: Function;
-  app: JupyterFrontEnd;
+  external: IShortcutUIexternal;
 }
 
 /** State for ShortcutItem component */
@@ -102,8 +102,8 @@ export class ShortcutItem extends React.Component<
     const key =
       this.props.shortcut.commandName + '_' + this.props.shortcut.selector;
 
-    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutEdit + key)) {
-      this.props.app.commands.addCommand(CommandIDs.shortcutEdit + key, {
+    if (!this.props.external.hasCommand(CommandIDs.shortcutEdit + key)) {
+      this.props.external.addCommand(CommandIDs.shortcutEdit + key, {
         label: 'Edit',
         caption: 'Edit existing sortcut',
         execute: () => {
@@ -112,9 +112,9 @@ export class ShortcutItem extends React.Component<
       });
     }
     if (
-      !this.props.app.commands.hasCommand(CommandIDs.shortcutEditLeft + key)
+      !this.props.external.hasCommand(CommandIDs.shortcutEditLeft + key)
     ) {
-      this.props.app.commands.addCommand(CommandIDs.shortcutEditLeft + key, {
+      this.props.external.addCommand(CommandIDs.shortcutEditLeft + key, {
         label: 'Edit First',
         caption: 'Edit existing shortcut',
         execute: () => {
@@ -123,9 +123,9 @@ export class ShortcutItem extends React.Component<
       });
     }
     if (
-      !this.props.app.commands.hasCommand(CommandIDs.shortcutEditRight + key)
+      !this.props.external.hasCommand(CommandIDs.shortcutEditRight + key)
     ) {
-      this.props.app.commands.addCommand(CommandIDs.shortcutEditRight + key, {
+      this.props.external.addCommand(CommandIDs.shortcutEditRight + key, {
         label: 'Edit Second',
         caption: 'Edit existing shortcut',
         execute: () => {
@@ -133,8 +133,8 @@ export class ShortcutItem extends React.Component<
         }
       });
     }
-    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutAddNew + key)) {
-      this.props.app.commands.addCommand(CommandIDs.shortcutAddNew + key, {
+    if (!this.props.external.hasCommand(CommandIDs.shortcutAddNew + key)) {
+      this.props.external.addCommand(CommandIDs.shortcutAddNew + key, {
         label: 'Add',
         caption: 'Add new shortcut',
         execute: () => {
@@ -143,9 +143,9 @@ export class ShortcutItem extends React.Component<
       });
     }
     if (
-      !this.props.app.commands.hasCommand(CommandIDs.shortcutAddAnother + key)
+      !this.props.external.hasCommand(CommandIDs.shortcutAddAnother + key)
     ) {
-      this.props.app.commands.addCommand(CommandIDs.shortcutAddAnother + key, {
+      this.props.external.addCommand(CommandIDs.shortcutAddAnother + key, {
         label: 'Add',
         caption: 'Add another shortcut',
         execute: () => {
@@ -153,8 +153,8 @@ export class ShortcutItem extends React.Component<
         }
       });
     }
-    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutReset + key)) {
-      this.props.app.commands.addCommand(CommandIDs.shortcutReset + key, {
+    if (!this.props.external.hasCommand(CommandIDs.shortcutReset + key)) {
+      this.props.external.addCommand(CommandIDs.shortcutReset + key, {
         label: 'Reset',
         caption: 'Reset shortcut back to default',
         execute: () => {

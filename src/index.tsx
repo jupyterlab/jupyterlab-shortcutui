@@ -14,12 +14,12 @@ import {
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget, Menu } from '@phosphor/widgets';
 
-import ShortcutWidget from './ShortcutWidget';
+import ShortcutWidget, { IShortcutUIexternal } from './ShortcutWidget';
 
 import '../style/variables.css';
-import { ReadonlyJSONArray } from '@phosphor/coreutils';
+import { CommandRegistry } from '@phosphor/commands';
 
 /** Object for shortcut items */
 export class ShortcutObject {
@@ -106,7 +106,6 @@ function activate(
   restorer: ILayoutRestorer | null
 ): void {
   const command = 'shortcutui:open-ui';
-  const pluginLocation = '@jupyterlab/shortcuts-extension:shortcuts';
   const label = 'Keyboard Shortcut Editor';
   let widget: MainAreaWidget<ShortcutWidget>;
   // Track and restore the widget state
@@ -119,24 +118,10 @@ function activate(
     label: label,
     execute: async () => {
       if (widget == undefined || !widget.isAttached) {
-        /** Load keyboard shortcut settings from registry and create list of command id's */
-        const shortCutsFromRegistry = await settingRegistry.load(
-          pluginLocation
-        );
-        const shortCutsListJson = shortCutsFromRegistry.composite
-          .shortcuts as ReadonlyJSONArray;
-        const shortCutsList = [];
-        if (shortCutsListJson) {
-          for (var index in shortCutsListJson) {
-            shortCutsList.push(shortCutsListJson[index]['command']);
-          }
-        }
         widget = createWidget(
-          shortCutsList,
           settingRegistry,
-          app,
-          pluginLocation,
-          label
+          label,
+          app
         );
       }
 
@@ -172,22 +157,30 @@ function activate(
   }
 }
 
-function createWidget(
-  commandlist: string[],
+function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
-  app: JupyterFrontEnd<JupyterFrontEnd.IShell>,
-  pluginLocation: string,
-  label: string
+  app: JupyterFrontEnd
+) : IShortcutUIexternal {
+  const { commands } = app;
+  const shortcutPluginLocation = '@jupyterlab/shortcuts-extension:shortcuts'
+  return {
+    getAllShortCutSettings: () => settingRegistry.reload(shortcutPluginLocation),
+    removeShortCut: (key: string) => settingRegistry.remove(shortcutPluginLocation, key),
+    openAdvanced: () => app.commands.execute('settingeditor:open'),
+    createMenu: () => new Menu( { commands } ),
+    hasCommand: (id: string) => commands.hasCommand(id),
+    addCommand: (id: string, options: CommandRegistry.ICommandOptions) =>
+      commands.addCommand(id, options),
+    getLabel: (id: string) => commands.label(id)
+  }
+}
+
+function createWidget(
+  settingRegistry: ISettingRegistry,
+  label: string,
+  app: JupyterFrontEnd
 ): MainAreaWidget<ShortcutWidget> {
-  const widget: ShortcutWidget = new ShortcutWidget(
-    -1,
-    -1,
-    commandlist,
-    settingRegistry,
-    app.commands,
-    pluginLocation,
-    app
-  );
+  const widget: ShortcutWidget = new ShortcutWidget(getExternalForJupyterLab(settingRegistry, app));
   widget.id = 'jupyterlab-shortcutui';
   widget.title.label = label;
   widget.title.closable = true;

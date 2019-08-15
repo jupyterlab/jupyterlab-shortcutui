@@ -4,8 +4,6 @@ import { classes } from 'typestyle';
 
 import { Menu } from '@phosphor/widgets';
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
-
 import {
   TopStyle,
   TopNavStyle,
@@ -28,6 +26,7 @@ import {
 import { CellStyle } from '../componentStyle/ShortcutItemStyle';
 
 import { ShortcutTitleItem } from './ShortcutTitleItem';
+import { IShortcutUIexternal } from '../ShortcutWidget';
 
 export interface IAdvancedOptionsProps {
   size: string;
@@ -49,96 +48,71 @@ export namespace CommandIDs {
 }
 
 class Symbols extends React.Component<ISymbolsProps, {}> {
+
+  getRegularSymbols() {
+    return (
+      <div className={SymbolsStyle}>
+        <div className={SymbolsRowStyle}>
+          <div>Cmd ⌘</div>
+          <div>Alt ⌥</div>
+          <div>Ctrl ⌃</div>
+          <div>Shift ⇧</div>
+        </div>
+      </div>
+    );
+  }
+
+  getSmallSymbols() {
+    return (
+      <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
+        <div className={SymbolsRowStyle}>
+          <span>Cmd </span>
+          <span className={commandIconStyle}>⌘</span>
+          <span>Alt </span>
+          <span className={altIconStyle}>⌥</span>
+        </div>
+        <div className={SymbolsRowStyle}>
+          <span>Ctrl </span>
+          <span className={controlIconStyle}>⌃</span>
+          <span>Shift </span>
+          <span>⇧</span>
+        </div>
+      </div>
+    );
+  }
+
+  getDefaultSymbols() {
+    return (
+      <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
+        <div className={SymbolsRowStyle}>
+          <span>Cmd</span>
+          <span>⌘</span>
+        </div>
+        <div className={SymbolsRowStyle}>
+          <span>Alt</span>
+          <span>⌥</span>
+        </div>
+        <div className={SymbolsRowStyle}>
+          <span>Ctrl</span>
+          <span>⌃</span>
+        </div>
+        <div className={SymbolsRowStyle}>
+          <span>Shift</span>
+          <span>⇧</span>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     if (this.props.size === 'regular') {
-      return (
-        <div className={SymbolsStyle}>
-          <div className={SymbolsRowStyle}>
-            <div>Cmd ⌘</div>
-            <div>Alt ⌥</div>
-            <div>Ctrl ⌃</div>
-            <div>Shift ⇧</div>
-          </div>
-        </div>
-      );
+      return this.getRegularSymbols();
     } else if (this.props.size === 'small') {
-      return (
-        <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
-          <div className={SymbolsRowStyle}>
-            <span>Cmd </span>
-            <span className={commandIconStyle}>⌘</span>
-            <span>Alt </span>
-            <span className={altIconStyle}>⌥</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Ctrl </span>
-            <span className={controlIconStyle}>⌃</span>
-            <span>Shift </span>
-            <span>⇧</span>
-          </div>
-        </div>
-      );
+      return this.getSmallSymbols();
     } else {
-      return (
-        <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
-          <div className={SymbolsRowStyle}>
-            <span>Cmd</span>
-            <span>⌘</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Alt</span>
-            <span>⌥</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Ctrl</span>
-            <span>⌃</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Shift</span>
-            <span>⇧</span>
-          </div>
-        </div>
-      );
+      return this.getDefaultSymbols();
     }
   }
-}
-
-{
-  /* <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
-          <div className={SymbolsRowStyle}>
-            <span>Cmd </span>
-            <span>⌘</span>
-            <span>Alt </span>
-            <span>⌥</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Ctrl </span>
-            <span>⌃</span>
-            <span>Shift </span>
-            <span>⇧</span>
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
-          <div className={SymbolsRowStyle}>
-            <span>Cmd</span>
-            <span>⌘</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Alt</span>
-            <span>⌥</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Ctrl</span>
-            <span>⌃</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Shift</span>
-            <span>⇧</span>
-          </div>
-        </div> */
 }
 
 class AdvancedOptions extends React.Component<IAdvancedOptionsProps, {}> {
@@ -207,7 +181,7 @@ export interface ITopNavProps {
   updateSort: Function;
   currentSort: string;
   width: number;
-  app: JupyterFrontEnd;
+  external: IShortcutUIexternal;
 }
 
 /** React component for top navigation */
@@ -217,16 +191,15 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
     super(props);
 
     this.addMenuCommands();
-    const { commands } = this.props.app;
-    this.menu = new Menu({ commands });
+    this.menu = this.props.external.createMenu();
     this.menu.addItem({ command: CommandIDs.showSelectors });
     this.menu.addItem({ command: CommandIDs.advancedEditor });
     this.menu.addItem({ command: CommandIDs.resetAll });
   }
 
   addMenuCommands() {
-    if (!this.props.app.commands.hasCommand(CommandIDs.showSelectors)) {
-      this.props.app.commands.addCommand(CommandIDs.showSelectors, {
+    if (!this.props.external.hasCommand(CommandIDs.showSelectors)) {
+      this.props.external.addCommand(CommandIDs.showSelectors, {
         label: 'Toggle Selectors',
         caption: 'Toggle command selectors',
         execute: () => {
@@ -234,8 +207,8 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
         }
       });
     }
-    if (!this.props.app.commands.hasCommand(CommandIDs.advancedEditor)) {
-      this.props.app.commands.addCommand(CommandIDs.advancedEditor, {
+    if (!this.props.external.hasCommand(CommandIDs.advancedEditor)) {
+      this.props.external.addCommand(CommandIDs.advancedEditor, {
         label: 'Advanced Editor',
         caption: 'Open advanced editor',
         execute: () => {
@@ -243,8 +216,8 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
         }
       });
     }
-    if (!this.props.app.commands.hasCommand(CommandIDs.resetAll)) {
-      this.props.app.commands.addCommand(CommandIDs.resetAll, {
+    if (!this.props.external.hasCommand(CommandIDs.resetAll)) {
+      this.props.external.addCommand(CommandIDs.resetAll, {
         label: 'Reset All',
         caption: 'Reset all shortcuts',
         execute: () => {
@@ -263,6 +236,17 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
     }
     return size;
   };
+
+  getShortCutTitleItem(title: string) {
+    return (
+      <div className={CellStyle}>
+        <ShortcutTitleItem
+          title={title}
+          updateSort={this.props.updateSort}
+          active={this.props.currentSort} />
+      </div>
+      )
+  }
 
   render() {
     return (
@@ -287,39 +271,13 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
         </div>
         <div className={HeaderRowContainerStyle}>
           <div className={HeaderRowStyle}>
-            <div className={CellStyle}>
-              <ShortcutTitleItem
-                title="Category"
-                updateSort={this.props.updateSort}
-                active={this.props.currentSort}
-              />
-            </div>
-            <div className={CellStyle}>
-              <ShortcutTitleItem
-                title="Command"
-                updateSort={this.props.updateSort}
-                active={this.props.currentSort}
-              />
-            </div>
+            {this.getShortCutTitleItem("Category")}
+            {this.getShortCutTitleItem("Command")}
             <div className={CellStyle}>
               <div className="title-div">Shortcut</div>
             </div>
-            <div className={CellStyle}>
-              <ShortcutTitleItem
-                title="Source"
-                updateSort={this.props.updateSort}
-                active={this.props.currentSort}
-              />
-            </div>
-            {this.props.showSelectors && (
-              <div className={CellStyle}>
-                <ShortcutTitleItem
-                  title="Selectors"
-                  updateSort={this.props.updateSort}
-                  active={this.props.currentSort}
-                />
-              </div>
-            )}
+            {this.getShortCutTitleItem("Source")}
+            {this.props.showSelectors && this.getShortCutTitleItem("Selectors")}
           </div>
         </div>
       </div>

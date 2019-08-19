@@ -1,4 +1,5 @@
 import { style } from 'typestyle';
+import { UISize } from '../components/ShortcutUI';
 
 export const CellStyle = style({
   padding: '6px 12px',
@@ -17,15 +18,11 @@ export const EmptyShortcutCellStyle = style({
   height: '32px',
 
   $nest: {
-    '& #add-link': {
-      //marginLeft: 'auto'
-    }
+    '& #add-link': {}
   }
 });
 
-export const SingleShortcutCellStyle = style({
-  //justifyContent: 'space-between'
-});
+export const SingleShortcutCellStyle = style({});
 
 export const RowStyle = style({
   padding: '10px',
@@ -51,32 +48,24 @@ export const RowStyle = style({
   }
 });
 
+function getMarginLeft(showSelectors: boolean, errorSize: UISize): string {
+  if (errorSize === UISize.Regular) {
+    return showSelectors ? '20%' : '25%';
+  } else {
+    return '0';
+  }
+}
+
 export function ConflictContainerStyle(
   showSelectors: boolean,
-  errorSize: string
+  errorSize: UISize
 ) {
-  if (showSelectors && errorSize === 'regular') {
-    return style({
-      display: 'flex',
-      flexWrap: 'wrap',
-      padding: '6px 12px',
-      marginLeft: '20%'
-    });
-  } else if (!showSelectors && errorSize === 'regular') {
-    return style({
-      display: 'flex',
-      flexWrap: 'wrap',
-      padding: '6px 12px',
-      marginLeft: '25%'
-    });
-  } else {
-    return style({
-      display: 'flex',
-      flexWrap: 'wrap',
-      padding: '6px 12px',
-      marginLeft: '0'
-    });
-  }
+  return style({
+    display: 'flex',
+    flexWrap: 'wrap',
+    padding: '6px 12px',
+    marginLeft: getMarginLeft(showSelectors, errorSize)
+  });
 }
 
 export const ErrorMessageStyle = style({
@@ -185,18 +174,6 @@ export const CommaStyle = style({
 });
 
 export const PlusStyle = style({
-  // backgroundColor: 'var(--jp-brand-color2)',
-  // color: 'var(--jp-layout-color0)',
-  // textDecoration: 'none',
-  // display: 'block',
-  // textAlign: 'center',
-  // textTransform: 'uppercase',
-  // boxSizing: 'border-box',
-  // padding: '0px 12px',
-  // height: '30px',
-  // lineHeight: '30px',
-  // border: '1px solid var(--jp-brand-color1)',
-
   display: 'none',
   background: 'var(--jp-brand-color3)',
   borderColor: 'var(--jp-layout-color0)',

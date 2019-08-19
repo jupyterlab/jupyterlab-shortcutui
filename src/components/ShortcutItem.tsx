@@ -28,6 +28,7 @@ import {
   ResetStyle
 } from '../componentStyle/ShortcutItemStyle';
 import { IShortcutUIexternal } from '../ShortcutWidget';
+import { UISize } from './ShortcutUI';
 
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {
@@ -39,7 +40,7 @@ export interface IShortcutItemProps {
   keyBindingsUsed: { [index: string]: TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
-  errorSize: string;
+  errorSize: UISize;
   contextMenu: Function;
   external: IShortcutUIexternal;
 }
@@ -52,13 +53,38 @@ export interface IShortcutItemState {
   numShortcuts: number;
 }
 
-export namespace CommandIDs {
-  export const shortcutEditLeft = 'shortcutui:EditLeft';
-  export const shortcutEditRight = 'shortcutui:EditRight';
-  export const shortcutEdit = 'shortcutui:Edit';
-  export const shortcutAddNew = 'shortcutui:AddNew';
-  export const shortcutAddAnother = 'shortcutui:AddAnother';
-  export const shortcutReset = 'shortcutui:Reset';
+/** Describe commands that are used by shortcuts */
+namespace Commands {
+  export const shortcutEditLeft = {
+    commandId: 'shortcutui:EditLeft',
+    label: 'Edit First',
+    caption: 'Edit existing shortcut'
+  };
+  export const shortcutEditRight = {
+    commandId: 'shortcutui:EditRight',
+    label: 'Edit Second',
+    caption: 'Edit existing shortcut'
+  };
+  export const shortcutEdit = {
+    commandId: 'shortcutui:Edit',
+    label: 'Edit',
+    caption: 'Edit existing sortcut'
+  };
+  export const shortcutAddNew = {
+    commandId: 'shortcutui:AddNew',
+    label: 'Add',
+    caption: 'Add new shortcut'
+  };
+  export const shortcutAddAnother = {
+    commandId: 'shortcutui:AddAnother',
+    label: 'Add',
+    caption: 'Add another shortcut'
+  };
+  export const shortcutReset = {
+    commandId: 'shortcutui:Reset',
+    label: 'Reset',
+    caption: 'Reset shortcut back to default'
+  };
 }
 
 /** React component for each command shortcut item */
@@ -98,70 +124,41 @@ export class ShortcutItem extends React.Component<
     });
   };
 
-  private handleRightClick = (e: any): void => {
+  private addCommandIfNeeded = (command: any, action: () => void): void => {
     const key =
       this.props.shortcut.commandName + '_' + this.props.shortcut.selector;
 
-    if (!this.props.external.hasCommand(CommandIDs.shortcutEdit + key)) {
-      this.props.external.addCommand(CommandIDs.shortcutEdit + key, {
-        label: 'Edit',
-        caption: 'Edit existing sortcut',
-        execute: () => {
-          this.toggleInputReplaceLeft();
-        }
+    if (!this.props.external.hasCommand(command.commandId + key)) {
+      this.props.external.addCommand(command.commandId + key, {
+        label: command.label,
+        caption: command.caption,
+        execute: action
       });
     }
-    if (
-      !this.props.external.hasCommand(CommandIDs.shortcutEditLeft + key)
-    ) {
-      this.props.external.addCommand(CommandIDs.shortcutEditLeft + key, {
-        label: 'Edit First',
-        caption: 'Edit existing shortcut',
-        execute: () => {
-          this.toggleInputReplaceLeft();
-        }
-      });
-    }
-    if (
-      !this.props.external.hasCommand(CommandIDs.shortcutEditRight + key)
-    ) {
-      this.props.external.addCommand(CommandIDs.shortcutEditRight + key, {
-        label: 'Edit Second',
-        caption: 'Edit existing shortcut',
-        execute: () => {
-          this.toggleInputReplaceRight();
-        }
-      });
-    }
-    if (!this.props.external.hasCommand(CommandIDs.shortcutAddNew + key)) {
-      this.props.external.addCommand(CommandIDs.shortcutAddNew + key, {
-        label: 'Add',
-        caption: 'Add new shortcut',
-        execute: () => {
-          this.toggleInputNew();
-        }
-      });
-    }
-    if (
-      !this.props.external.hasCommand(CommandIDs.shortcutAddAnother + key)
-    ) {
-      this.props.external.addCommand(CommandIDs.shortcutAddAnother + key, {
-        label: 'Add',
-        caption: 'Add another shortcut',
-        execute: () => {
-          this.toggleInputNew();
-        }
-      });
-    }
-    if (!this.props.external.hasCommand(CommandIDs.shortcutReset + key)) {
-      this.props.external.addCommand(CommandIDs.shortcutReset + key, {
-        label: 'Reset',
-        caption: 'Reset shortcut back to default',
-        execute: () => {
-          this.props.resetShortcut(this.props.shortcut);
-        }
-      });
-    }
+  };
+
+  private handleRightClick = (e: any): void => {
+    this.addCommandIfNeeded(Commands.shortcutEdit, () =>
+      this.toggleInputReplaceLeft()
+    );
+    this.addCommandIfNeeded(Commands.shortcutEditLeft, () =>
+      this.toggleInputReplaceLeft()
+    );
+    this.addCommandIfNeeded(Commands.shortcutEditRight, () =>
+      this.toggleInputReplaceRight()
+    );
+    this.addCommandIfNeeded(Commands.shortcutAddNew, () =>
+      this.toggleInputNew()
+    );
+    this.addCommandIfNeeded(Commands.shortcutAddAnother, () =>
+      this.toggleInputNew()
+    );
+    this.addCommandIfNeeded(Commands.shortcutReset, () =>
+      this.props.resetShortcut(this.props.shortcut)
+    );
+
+    const key =
+      this.props.shortcut.commandName + '_' + this.props.shortcut.selector;
 
     this.setState(
       {
@@ -173,20 +170,24 @@ export class ShortcutItem extends React.Component<
         let commandList = [];
         if (this.state.numShortcuts == 2) {
           commandList = commandList.concat([
-            CommandIDs.shortcutEditLeft + key,
-            CommandIDs.shortcutEditRight + key
+            Commands.shortcutEditLeft.commandId + key,
+            Commands.shortcutEditRight.commandId + key
           ]);
         } else if (this.state.numShortcuts == 1) {
           commandList = commandList.concat([
-            CommandIDs.shortcutEdit + key,
-            CommandIDs.shortcutAddAnother + key
+            Commands.shortcutEdit.commandId + key,
+            Commands.shortcutAddAnother.commandId + key
           ]);
         } else {
-          commandList = commandList.concat([CommandIDs.shortcutAddNew + key]);
+          commandList = commandList.concat([
+            Commands.shortcutAddNew.commandId + key
+          ]);
         }
 
         if (this.props.shortcut.source === 'Custom') {
-          commandList = commandList.concat([CommandIDs.shortcutReset + key]);
+          commandList = commandList.concat([
+            Commands.shortcutReset.commandId + key
+          ]);
         }
 
         this.props.contextMenu(e, commandList);

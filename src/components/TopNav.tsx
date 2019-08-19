@@ -27,9 +27,10 @@ import { CellStyle } from '../componentStyle/ShortcutItemStyle';
 
 import { ShortcutTitleItem } from './ShortcutTitleItem';
 import { IShortcutUIexternal } from '../ShortcutWidget';
+import { UISize } from './ShortcutUI';
 
 export interface IAdvancedOptionsProps {
-  size: string;
+  size: UISize;
   openAdvanced: Function;
   toggleSelectors: Function;
   showSelectors: boolean;
@@ -38,7 +39,7 @@ export interface IAdvancedOptionsProps {
 }
 
 export interface ISymbolsProps {
-  size: string;
+  size: UISize;
 }
 
 export namespace CommandIDs {
@@ -48,7 +49,6 @@ export namespace CommandIDs {
 }
 
 class Symbols extends React.Component<ISymbolsProps, {}> {
-
   getRegularSymbols() {
     return (
       <div className={SymbolsStyle}>
@@ -81,7 +81,7 @@ class Symbols extends React.Component<ISymbolsProps, {}> {
     );
   }
 
-  getDefaultSymbols() {
+  getTinySymbols() {
     return (
       <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
         <div className={SymbolsRowStyle}>
@@ -105,19 +105,20 @@ class Symbols extends React.Component<ISymbolsProps, {}> {
   }
 
   render() {
-    if (this.props.size === 'regular') {
-      return this.getRegularSymbols();
-    } else if (this.props.size === 'small') {
-      return this.getSmallSymbols();
-    } else {
-      return this.getDefaultSymbols();
+    switch (this.props.size) {
+      case UISize.Regular:
+        return this.getRegularSymbols();
+      case UISize.Small:
+        return this.getSmallSymbols();
+      case UISize.Tiny:
+        return this.getTinySymbols();
     }
   }
 }
 
 class AdvancedOptions extends React.Component<IAdvancedOptionsProps, {}> {
   render() {
-    if (this.props.size === 'regular') {
+    if (this.props.size === UISize.Regular) {
       return (
         <div className={AdvancedOptionsContainerStyle}>
           <div className={AdvancedOptionsStyle}>
@@ -227,14 +228,14 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
     }
   }
 
-  getSize = (width: number): string => {
-    let size: string = 'regular';
+  getSize = (width: number): UISize => {
     if (width < 730) {
-      size = 'tiny';
+      return UISize.Tiny;
     } else if (width < 1260) {
-      size = 'small';
+      return UISize.Small;
+    } else {
+      return UISize.Regular;
     }
-    return size;
   };
 
   getShortCutTitleItem(title: string) {
@@ -243,9 +244,10 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
         <ShortcutTitleItem
           title={title}
           updateSort={this.props.updateSort}
-          active={this.props.currentSort} />
+          active={this.props.currentSort}
+        />
       </div>
-      )
+    );
   }
 
   render() {
@@ -271,13 +273,13 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
         </div>
         <div className={HeaderRowContainerStyle}>
           <div className={HeaderRowStyle}>
-            {this.getShortCutTitleItem("Category")}
-            {this.getShortCutTitleItem("Command")}
+            {this.getShortCutTitleItem('Category')}
+            {this.getShortCutTitleItem('Command')}
             <div className={CellStyle}>
               <div className="title-div">Shortcut</div>
             </div>
-            {this.getShortCutTitleItem("Source")}
-            {this.props.showSelectors && this.getShortCutTitleItem("Selectors")}
+            {this.getShortCutTitleItem('Source')}
+            {this.props.showSelectors && this.getShortCutTitleItem('Selectors')}
           </div>
         </div>
       </div>

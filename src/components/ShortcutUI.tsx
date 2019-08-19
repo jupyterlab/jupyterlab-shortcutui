@@ -8,7 +8,7 @@ import { TopNav } from './TopNav';
 
 import { ShortcutObject, ErrorObject, TakenByObject } from '../index';
 
-import { IShortcutUIexternal } from '../ShortcutWidget'
+import { IShortcutUIexternal } from '../ShortcutWidget';
 
 import {
   TopWhitespaceStyle,
@@ -23,6 +23,12 @@ const enum MatchType {
   Category,
   Split,
   Default
+}
+
+export const enum UISize {
+  Regular,
+  Small,
+  Tiny
 }
 
 /** Props for ShortcutUI component */
@@ -317,9 +323,9 @@ export class ShortcutUI extends React.Component<
 
   /** Reset all shortcuts to their defaults */
   resetShortcuts = async () => {
-    const settings = await this.props.external.getAllShortCutSettings()
+    const settings = await this.props.external.getAllShortCutSettings();
     for (const key of Object.keys(settings.user)) {
-      await this.props.external.removeShortCut(key); 
+      await this.props.external.removeShortCut(key);
     }
     await this._refreshShortcutList();
   };
@@ -501,7 +507,7 @@ export class ShortcutUI extends React.Component<
           sortConflict={this.sortConflict}
           clearConflicts={this.clearConflicts}
           height={this.props.height}
-          errorSize={this.props.width < 775 ? 'small' : 'regular'}
+          errorSize={this.props.width < 775 ? UISize.Small : UISize.Regular}
           contextMenu={this.contextMenu}
           external={this.props.external}
         />

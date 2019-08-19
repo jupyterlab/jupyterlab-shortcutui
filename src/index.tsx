@@ -118,11 +118,7 @@ function activate(
     label: label,
     execute: async () => {
       if (widget == undefined || !widget.isAttached) {
-        widget = createWidget(
-          settingRegistry,
-          label,
-          app
-        );
+        widget = createWidget(settingRegistry, label, app);
       }
 
       if (!tracker.has(widget)) {
@@ -160,19 +156,21 @@ function activate(
 function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
   app: JupyterFrontEnd
-) : IShortcutUIexternal {
+): IShortcutUIexternal {
   const { commands } = app;
-  const shortcutPluginLocation = '@jupyterlab/shortcuts-extension:shortcuts'
+  const shortcutPluginLocation = '@jupyterlab/shortcuts-extension:shortcuts';
   return {
-    getAllShortCutSettings: () => settingRegistry.reload(shortcutPluginLocation),
-    removeShortCut: (key: string) => settingRegistry.remove(shortcutPluginLocation, key),
+    getAllShortCutSettings: () =>
+      settingRegistry.reload(shortcutPluginLocation),
+    removeShortCut: (key: string) =>
+      settingRegistry.remove(shortcutPluginLocation, key),
     openAdvanced: () => app.commands.execute('settingeditor:open'),
-    createMenu: () => new Menu( { commands } ),
+    createMenu: () => new Menu({ commands }),
     hasCommand: (id: string) => commands.hasCommand(id),
     addCommand: (id: string, options: CommandRegistry.ICommandOptions) =>
       commands.addCommand(id, options),
     getLabel: (id: string) => commands.label(id)
-  }
+  };
 }
 
 function createWidget(
@@ -180,7 +178,9 @@ function createWidget(
   label: string,
   app: JupyterFrontEnd
 ): MainAreaWidget<ShortcutWidget> {
-  const widget: ShortcutWidget = new ShortcutWidget(getExternalForJupyterLab(settingRegistry, app));
+  const widget: ShortcutWidget = new ShortcutWidget(
+    getExternalForJupyterLab(settingRegistry, app)
+  );
   widget.id = 'jupyterlab-shortcutui';
   widget.title.label = label;
   widget.title.closable = true;

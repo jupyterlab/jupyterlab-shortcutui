@@ -13,14 +13,17 @@ import { Widget, Title, Menu } from '@phosphor/widgets';
 import * as ReactDOM from 'react-dom';
 import { IDisposable } from '@phosphor/disposable';
 
- /** All external actions, setting commands, getting command list ... */
- export interface IShortcutUIexternal {
+/** All external actions, setting commands, getting command list ... */
+export interface IShortcutUIexternal {
   getAllShortCutSettings: () => Promise<ISettingRegistry.ISettings>;
   removeShortCut: (key: String) => Promise<void>;
   openAdvanced: () => void;
   createMenu: () => Menu;
   hasCommand: (id: string) => boolean;
-  addCommand: (id: string, options: CommandRegistry.ICommandOptions) => IDisposable;
+  addCommand: (
+    id: string,
+    options: CommandRegistry.ICommandOptions
+  ) => IDisposable;
   getLabel: (id: string) => string;
 }
 
@@ -33,9 +36,7 @@ export default class ShortcutWidget extends VDomRenderer<VDomModel> {
   title: Title<Widget>;
   reactComponent: React.ReactElement<any>;
 
-  constructor(
-    external: IShortcutUIexternal
-  ) {
+  constructor(external: IShortcutUIexternal) {
     super();
     this.height = -1;
     this.width = -1;

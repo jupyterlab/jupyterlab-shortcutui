@@ -9,6 +9,7 @@ import {
   ShortcutListContainerStyle
 } from '../componentStyle/ShortcutListStyle';
 import { IShortcutUIexternal } from '../ShortcutWidget';
+import { UISize } from './ShortcutUI';
 
 const TOPNAV_HEIGHT: number = 115;
 
@@ -23,7 +24,7 @@ export interface IShortcutListProps {
   sortConflict: Function;
   clearConflicts: Function;
   height: number;
-  errorSize: string;
+  errorSize: UISize;
   contextMenu: Function;
   external: IShortcutUIexternal;
 }

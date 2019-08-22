@@ -53,6 +53,11 @@ export interface IShortcutItemState {
   numShortcuts: number;
 }
 
+enum ShortCutLocation {
+  Left,
+  Right
+}
+
 /** Describe commands that are used by shortcuts */
 namespace Commands {
   export const shortcutEditLeft = {
@@ -286,135 +291,173 @@ export class ShortcutItem extends React.Component<
     );
   }
 
+  getClassNameForShortCuts(nonEmptyKeys: string[]): string {
+    return nonEmptyKeys.length === 0
+      ? classes(ShortcutCellStyle, EmptyShortcutCellStyle)
+      : nonEmptyKeys.length === 1
+      ? classes(ShortcutCellStyle, SingleShortcutCellStyle)
+      : ShortcutCellStyle;
+  }
+
+  callOnClick;
+
+  getTogleInputReplaceMethod(location: ShortCutLocation): () => void {
+    switch (location) {
+      case ShortCutLocation.Left:
+        return this.toggleInputReplaceLeft;
+      case ShortCutLocation.Right:
+        return this.toggleInputReplaceRight;
+    }
+  }
+
+  getDisplayReplaceInput(location: ShortCutLocation): boolean {
+    switch (location) {
+      case ShortCutLocation.Left:
+        return this.state.displayReplaceInputLeft;
+      case ShortCutLocation.Right:
+        return this.state.displayReplaceInputRight;
+    }
+  }
+
+  getOrDiplayIfNeeded(nonEmptyKeys: string[]): JSX.Element {
+    return (
+      <div
+        className={
+          nonEmptyKeys.length == 2 || this.state.displayNewInput
+            ? OrTwoStyle
+            : OrStyle
+        }
+        id={
+          nonEmptyKeys.length == 2
+            ? 'secondor'
+            : this.state.displayReplaceInputLeft
+            ? 'noor'
+            : 'or'
+        }
+      >
+        or
+      </div>
+    );
+  }
+
+  getShortCutAsInput(key: string, location: ShortCutLocation): JSX.Element {
+    return (
+      <ShortcutInput
+        handleUpdate={this.props.handleUpdate}
+        deleteShortcut={this.props.deleteShortcut}
+        toggleInput={this.getTogleInputReplaceMethod(location)}
+        shortcut={this.props.shortcut}
+        shortcutId={key}
+        toSymbols={this.toSymbols}
+        keyBindingsUsed={this.props.keyBindingsUsed}
+        sortConflict={this.props.sortConflict}
+        clearConflicts={this.props.clearConflicts}
+        displayInput={this.getDisplayReplaceInput(location)}
+        newOrReplace={'replace'}
+        placeholder={this.toSymbols(this.props.shortcut.keys[key].join(', '))}
+      />
+    );
+  }
+
+  getShortCutForDisplayOnly(key: string): JSX.Element[] {
+    return this.props.shortcut.keys[key].map(
+      (keyBinding: string, index: number) => (
+        <div className={ShortcutKeysContainerStyle} key={index}>
+          <div className={ShortcutKeysStyle} id={'shortcut-keys'}>
+            {this.toSymbols(keyBinding)}
+          </div>
+          {index + 1 < this.props.shortcut.keys[key].length ? (
+            <div className={CommaStyle}>,</div>
+          ) : null}
+        </div>
+      )
+    );
+  }
+
+  isLocationBeingEdited(location: ShortCutLocation): boolean {
+    return (
+      (location === ShortCutLocation.Left &&
+        this.state.displayReplaceInputLeft) ||
+      (location === ShortCutLocation.Right &&
+        this.state.displayReplaceInputRight)
+    );
+  }
+
+  getLocationFromIndex(index: number): ShortCutLocation {
+    return index === 0 ? ShortCutLocation.Left : ShortCutLocation.Right;
+  }
+
+  getDivForKey(
+    index: number,
+    key: string,
+    nonEmptyKeys: string[]
+  ): JSX.Element {
+    const location = this.getLocationFromIndex(index);
+    return (
+      <div
+        className={ShortcutContainerStyle}
+        key={this.props.shortcut.id + '_' + index}
+        onClick={this.getTogleInputReplaceMethod(location)}
+      >
+        {this.isLocationBeingEdited(location)
+          ? this.getShortCutAsInput(key, location)
+          : this.getShortCutForDisplayOnly(key)}
+        {location === ShortCutLocation.Left &&
+          this.getOrDiplayIfNeeded(nonEmptyKeys)}
+      </div>
+    );
+  }
+
+  getAddLink(): JSX.Element {
+    return (
+      <a
+        className={!this.state.displayNewInput ? PlusStyle : ''}
+        onClick={() => {
+          this.toggleInputNew(), this.props.clearConflicts();
+        }}
+        id="add-link"
+      >
+        Add
+      </a>
+    );
+  }
+
+  getInputBoxWhenToggled(): JSX.Element {
+    return (
+      this.state.displayNewInput && (
+        <ShortcutInput
+          handleUpdate={this.props.handleUpdate}
+          deleteShortcut={this.props.deleteShortcut}
+          toggleInput={this.toggleInputNew}
+          shortcut={this.props.shortcut}
+          shortcutId=""
+          toSymbols={this.toSymbols}
+          keyBindingsUsed={this.props.keyBindingsUsed}
+          sortConflict={this.props.sortConflict}
+          clearConflicts={this.props.clearConflicts}
+          displayInput={this.state.displayNewInput}
+          newOrReplace={'new'}
+          placeholder={''}
+        />
+      )
+    );
+  }
+
   getShortCutsCell(nonEmptyKeys: string[]): JSX.Element {
     return (
       <div className={CellStyle}>
-        <div
-          className={
-            nonEmptyKeys.length === 0
-              ? classes(ShortcutCellStyle, EmptyShortcutCellStyle)
-              : nonEmptyKeys.length === 1
-              ? classes(ShortcutCellStyle, SingleShortcutCellStyle)
-              : ShortcutCellStyle
-          }
-        >
-          {nonEmptyKeys.map((key, index) => (
-            <div
-              className={ShortcutContainerStyle}
-              key={this.props.shortcut.id + '_' + index}
-              onClick={() => {
-                if (index == 0) {
-                  this.toggleInputReplaceLeft();
-                } else {
-                  this.toggleInputReplaceRight();
-                }
-              }}
-            >
-              {!(
-                (index === 0 && this.state.displayReplaceInputLeft) ||
-                (index === 1 && this.state.displayReplaceInputRight)
-              ) ? (
-                this.props.shortcut.keys[key].map(
-                  (keyBinding: string, index: number) => (
-                    <div className={ShortcutKeysContainerStyle} key={index}>
-                      <div className={ShortcutKeysStyle} id={'shortcut-keys'}>
-                        {this.toSymbols(keyBinding)}
-                      </div>
-                      {index + 1 < this.props.shortcut.keys[key].length ? (
-                        <div className={CommaStyle}>,</div>
-                      ) : null}
-                    </div>
-                  )
-                )
-              ) : (
-                <ShortcutInput
-                  handleUpdate={this.props.handleUpdate}
-                  deleteShortcut={this.props.deleteShortcut}
-                  toggleInput={
-                    index === 0
-                      ? this.toggleInputReplaceLeft
-                      : this.toggleInputReplaceRight
-                  }
-                  shortcut={this.props.shortcut}
-                  shortcutId={key}
-                  toSymbols={this.toSymbols}
-                  keyBindingsUsed={this.props.keyBindingsUsed}
-                  sortConflict={this.props.sortConflict}
-                  clearConflicts={this.props.clearConflicts}
-                  displayInput={
-                    index === 0
-                      ? this.state.displayReplaceInputLeft
-                      : this.state.displayReplaceInputRight
-                  }
-                  newOrReplace={'replace'}
-                  placeholder={this.toSymbols(
-                    this.props.shortcut.keys[key].join(', ')
-                  )}
-                />
-              )}
-              {index === 0 && (
-                <div
-                  className={
-                    nonEmptyKeys.length == 2 || this.state.displayNewInput
-                      ? OrTwoStyle
-                      : OrStyle
-                  }
-                  id={
-                    nonEmptyKeys.length == 2
-                      ? 'secondor'
-                      : this.state.displayReplaceInputLeft
-                      ? 'noor'
-                      : 'or'
-                  }
-                >
-                  or
-                </div>
-              )}
-            </div>
-          ))}
-
+        <div className={this.getClassNameForShortCuts(nonEmptyKeys)}>
+          {nonEmptyKeys.map((key, index) =>
+            this.getDivForKey(index, key, nonEmptyKeys)
+          )}
           {nonEmptyKeys.length === 1 &&
             !this.state.displayNewInput &&
-            !this.state.displayReplaceInputLeft && (
-              <a
-                className={!this.state.displayNewInput ? PlusStyle : ''}
-                onClick={() => {
-                  this.toggleInputNew(), this.props.clearConflicts();
-                }}
-                id="add-link"
-              >
-                Add
-              </a>
-            )}
-          {nonEmptyKeys.length === 0 && !this.state.displayNewInput && (
-            <a
-              className={!this.state.displayNewInput ? PlusStyle : ''}
-              onClick={() => {
-                this.toggleInputNew(), this.props.clearConflicts();
-              }}
-              id="add-link"
-            >
-              Add
-            </a>
-          )}
-
-          {/** Display input box when toggled */}
-          {this.state.displayNewInput && (
-            <ShortcutInput
-              handleUpdate={this.props.handleUpdate}
-              deleteShortcut={this.props.deleteShortcut}
-              toggleInput={this.toggleInputNew}
-              shortcut={this.props.shortcut}
-              shortcutId=""
-              toSymbols={this.toSymbols}
-              keyBindingsUsed={this.props.keyBindingsUsed}
-              sortConflict={this.props.sortConflict}
-              clearConflicts={this.props.clearConflicts}
-              displayInput={this.state.displayNewInput}
-              newOrReplace={'new'}
-              placeholder={''}
-            />
-          )}
+            !this.state.displayReplaceInputLeft &&
+            this.getAddLink()}
+          {nonEmptyKeys.length === 0 &&
+            !this.state.displayNewInput &&
+            this.getAddLink()}
+          {this.getInputBoxWhenToggled()}
         </div>
       </div>
     );

@@ -299,9 +299,7 @@ export class ShortcutItem extends React.Component<
       : ShortcutCellStyle;
   }
 
-  callOnClick;
-
-  getTogleInputReplaceMethod(location: ShortCutLocation): () => void {
+  getToggleInputReplaceMethod(location: ShortCutLocation): () => void {
     switch (location) {
       case ShortCutLocation.Left:
         return this.toggleInputReplaceLeft;
@@ -345,7 +343,7 @@ export class ShortcutItem extends React.Component<
       <ShortcutInput
         handleUpdate={this.props.handleUpdate}
         deleteShortcut={this.props.deleteShortcut}
-        toggleInput={this.getTogleInputReplaceMethod(location)}
+        toggleInput={this.getToggleInputReplaceMethod(location)}
         shortcut={this.props.shortcut}
         shortcutId={key}
         toSymbols={this.toSymbols}
@@ -397,7 +395,7 @@ export class ShortcutItem extends React.Component<
       <div
         className={ShortcutContainerStyle}
         key={this.props.shortcut.id + '_' + index}
-        onClick={this.getTogleInputReplaceMethod(location)}
+        onClick={this.getToggleInputReplaceMethod(location)}
       >
         {this.isLocationBeingEdited(location)
           ? this.getShortCutAsInput(key, location)

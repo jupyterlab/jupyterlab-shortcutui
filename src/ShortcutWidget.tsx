@@ -2,60 +2,53 @@ import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import * as React from 'react';
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
-
 import { ShortcutUI } from './components/ShortcutUI';
 
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
 import { CommandRegistry } from '@phosphor/commands';
 
-import { Widget, Title } from '@phosphor/widgets';
+import { Widget, Title, Menu } from '@phosphor/widgets';
 
 import * as ReactDOM from 'react-dom';
+import { IDisposable } from '@phosphor/disposable';
+
+/** All external actions, setting commands, getting command list ... */
+export interface IShortcutUIexternal {
+  getAllShortCutSettings: () => Promise<ISettingRegistry.ISettings>;
+  removeShortCut: (key: String) => Promise<void>;
+  openAdvanced: () => void;
+  createMenu: () => Menu;
+  hasCommand: (id: string) => boolean;
+  addCommand: (
+    id: string,
+    options: CommandRegistry.ICommandOptions
+  ) => IDisposable;
+  getLabel: (id: string) => string;
+}
 
 export default class ShortcutWidget extends VDomRenderer<VDomModel> {
   height: number;
   width: number;
-  commandList: string[];
-  settingRegistry: ISettingRegistry;
-  shortcutPlugin: string;
-  commandRegistry: CommandRegistry;
+  external: IShortcutUIexternal;
   id: string;
   isAttached: boolean;
   title: Title<Widget>;
   reactComponent: React.ReactElement<any>;
-  app: JupyterFrontEnd;
 
-  constructor(
-    height: number,
-    width: number,
-    commandList: string[],
-    settingRegistry: ISettingRegistry,
-    commandRegistry: CommandRegistry,
-    shortcutPlugin: string,
-    app: JupyterFrontEnd
-  ) {
+  constructor(external: IShortcutUIexternal) {
     super();
-    this.height = height;
-    this.width = width;
-    this.commandList = commandList;
-    this.settingRegistry = settingRegistry;
-    this.commandRegistry = commandRegistry;
-    this.shortcutPlugin = shortcutPlugin;
-    this.app = app;
+    this.height = -1;
+    this.width = -1;
+    this.external = external;
   }
 
   protected onUpdateRequest(): void {
     this.reactComponent = (
       <ShortcutUI
-        commandList={this.commandList}
-        settingRegistry={this.settingRegistry}
-        shortcutPlugin={this.shortcutPlugin}
-        commandRegistry={this.commandRegistry}
+        external={this.external}
         height={this.height}
         width={this.width}
-        app={this.app}
       />
     );
     ReactDOM.render(

@@ -2,14 +2,14 @@ import { ShortcutItem } from './ShortcutItem';
 
 import { ShortcutObject, TakenByObject } from '..';
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
-
 import * as React from 'react';
 
 import {
   ShortcutListStyle,
   ShortcutListContainerStyle
 } from '../componentStyle/ShortcutListStyle';
+import { IShortcutUIexternal } from '../ShortcutWidget';
+import { UISize } from './ShortcutUI';
 
 const TOPNAV_HEIGHT: number = 115;
 
@@ -24,9 +24,9 @@ export interface IShortcutListProps {
   sortConflict: Function;
   clearConflicts: Function;
   height: number;
-  errorSize: string;
+  errorSize: UISize;
   contextMenu: Function;
-  app: JupyterFrontEnd;
+  external: IShortcutUIexternal;
 }
 
 /** React component for list of shortcuts */
@@ -55,7 +55,7 @@ export class ShortcutList extends React.Component<IShortcutListProps, {}> {
                 clearConflicts={this.props.clearConflicts}
                 errorSize={this.props.errorSize}
                 contextMenu={this.props.contextMenu}
-                app={this.props.app}
+                external={this.props.external}
               />
             );
           })}

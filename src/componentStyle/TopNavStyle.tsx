@@ -1,4 +1,5 @@
 import { style } from 'typestyle';
+import { UISize } from '../components/ShortcutUI';
 
 export const TopStyle = style({
   display: 'block'
@@ -95,8 +96,8 @@ export const AdvancedOptionsRightStyle = style({
   marginTop: '8px'
 });
 
-export function AdvancedOptionsLinkStyle(size: string) {
-  if (size === 'regular') {
+export function AdvancedOptionsLinkStyle(size: UISize) {
+  if (size === UISize.Regular) {
     return style({
       color: 'var(--jp-brand-color2)',
       textDecoration: 'none',

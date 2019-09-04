@@ -4,8 +4,6 @@ import { classes } from 'typestyle';
 
 import { Menu } from '@phosphor/widgets';
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
-
 import {
   TopStyle,
   TopNavStyle,
@@ -28,9 +26,11 @@ import {
 import { CellStyle } from '../componentStyle/ShortcutItemStyle';
 
 import { ShortcutTitleItem } from './ShortcutTitleItem';
+import { IShortcutUIexternal } from '../ShortcutWidget';
+import { UISize } from './ShortcutUI';
 
 export interface IAdvancedOptionsProps {
-  size: string;
+  size: UISize;
   openAdvanced: Function;
   toggleSelectors: Function;
   showSelectors: boolean;
@@ -39,7 +39,7 @@ export interface IAdvancedOptionsProps {
 }
 
 export interface ISymbolsProps {
-  size: string;
+  size: UISize;
 }
 
 export namespace CommandIDs {
@@ -49,101 +49,76 @@ export namespace CommandIDs {
 }
 
 class Symbols extends React.Component<ISymbolsProps, {}> {
+  getRegularSymbols() {
+    return (
+      <div className={SymbolsStyle}>
+        <div className={SymbolsRowStyle}>
+          <div>Cmd ⌘</div>
+          <div>Alt ⌥</div>
+          <div>Ctrl ⌃</div>
+          <div>Shift ⇧</div>
+        </div>
+      </div>
+    );
+  }
+
+  getSmallSymbols() {
+    return (
+      <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
+        <div className={SymbolsRowStyle}>
+          <span>Cmd </span>
+          <span className={commandIconStyle}>⌘</span>
+          <span>Alt </span>
+          <span className={altIconStyle}>⌥</span>
+        </div>
+        <div className={SymbolsRowStyle}>
+          <span>Ctrl </span>
+          <span className={controlIconStyle}>⌃</span>
+          <span>Shift </span>
+          <span>⇧</span>
+        </div>
+      </div>
+    );
+  }
+
+  getTinySymbols() {
+    return (
+      <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
+        <div className={SymbolsRowStyle}>
+          <span>Cmd</span>
+          <span>⌘</span>
+        </div>
+        <div className={SymbolsRowStyle}>
+          <span>Alt</span>
+          <span>⌥</span>
+        </div>
+        <div className={SymbolsRowStyle}>
+          <span>Ctrl</span>
+          <span>⌃</span>
+        </div>
+        <div className={SymbolsRowStyle}>
+          <span>Shift</span>
+          <span>⇧</span>
+        </div>
+      </div>
+    );
+  }
+
   render() {
-    if (this.props.size === 'regular') {
-      return (
-        <div className={SymbolsStyle}>
-          <div className={SymbolsRowStyle}>
-            <div>Cmd ⌘</div>
-            <div>Alt ⌥</div>
-            <div>Ctrl ⌃</div>
-            <div>Shift ⇧</div>
-          </div>
-        </div>
-      );
-    } else if (this.props.size === 'small') {
-      return (
-        <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
-          <div className={SymbolsRowStyle}>
-            <span>Cmd </span>
-            <span className={commandIconStyle}>⌘</span>
-            <span>Alt </span>
-            <span className={altIconStyle}>⌥</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Ctrl </span>
-            <span className={controlIconStyle}>⌃</span>
-            <span>Shift </span>
-            <span>⇧</span>
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
-          <div className={SymbolsRowStyle}>
-            <span>Cmd</span>
-            <span>⌘</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Alt</span>
-            <span>⌥</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Ctrl</span>
-            <span>⌃</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Shift</span>
-            <span>⇧</span>
-          </div>
-        </div>
-      );
+    switch (this.props.size) {
+      case UISize.Regular:
+        return this.getRegularSymbols();
+      case UISize.Small:
+        return this.getSmallSymbols();
+      case UISize.Tiny:
+        return this.getTinySymbols();
     }
   }
 }
 
-{
-  /* <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
-          <div className={SymbolsRowStyle}>
-            <span>Cmd </span>
-            <span>⌘</span>
-            <span>Alt </span>
-            <span>⌥</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Ctrl </span>
-            <span>⌃</span>
-            <span>Shift </span>
-            <span>⇧</span>
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className={classes(SymbolsStyle, SymbolsSmallStyle)}>
-          <div className={SymbolsRowStyle}>
-            <span>Cmd</span>
-            <span>⌘</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Alt</span>
-            <span>⌥</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Ctrl</span>
-            <span>⌃</span>
-          </div>
-          <div className={SymbolsRowStyle}>
-            <span>Shift</span>
-            <span>⇧</span>
-          </div>
-        </div> */
-}
-
 class AdvancedOptions extends React.Component<IAdvancedOptionsProps, {}> {
   render() {
-    if (this.props.size === 'regular') {
+    if (this.props.size === UISize.Regular) {
       return (
         <div className={AdvancedOptionsContainerStyle}>
           <div className={AdvancedOptionsStyle}>
@@ -207,7 +182,7 @@ export interface ITopNavProps {
   updateSort: Function;
   currentSort: string;
   width: number;
-  app: JupyterFrontEnd;
+  external: IShortcutUIexternal;
 }
 
 /** React component for top navigation */
@@ -217,16 +192,15 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
     super(props);
 
     this.addMenuCommands();
-    const { commands } = this.props.app;
-    this.menu = new Menu({ commands });
+    this.menu = this.props.external.createMenu();
     this.menu.addItem({ command: CommandIDs.showSelectors });
     this.menu.addItem({ command: CommandIDs.advancedEditor });
     this.menu.addItem({ command: CommandIDs.resetAll });
   }
 
   addMenuCommands() {
-    if (!this.props.app.commands.hasCommand(CommandIDs.showSelectors)) {
-      this.props.app.commands.addCommand(CommandIDs.showSelectors, {
+    if (!this.props.external.hasCommand(CommandIDs.showSelectors)) {
+      this.props.external.addCommand(CommandIDs.showSelectors, {
         label: 'Toggle Selectors',
         caption: 'Toggle command selectors',
         execute: () => {
@@ -234,8 +208,8 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
         }
       });
     }
-    if (!this.props.app.commands.hasCommand(CommandIDs.advancedEditor)) {
-      this.props.app.commands.addCommand(CommandIDs.advancedEditor, {
+    if (!this.props.external.hasCommand(CommandIDs.advancedEditor)) {
+      this.props.external.addCommand(CommandIDs.advancedEditor, {
         label: 'Advanced Editor',
         caption: 'Open advanced editor',
         execute: () => {
@@ -243,8 +217,8 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
         }
       });
     }
-    if (!this.props.app.commands.hasCommand(CommandIDs.resetAll)) {
-      this.props.app.commands.addCommand(CommandIDs.resetAll, {
+    if (!this.props.external.hasCommand(CommandIDs.resetAll)) {
+      this.props.external.addCommand(CommandIDs.resetAll, {
         label: 'Reset All',
         caption: 'Reset all shortcuts',
         execute: () => {
@@ -254,15 +228,27 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
     }
   }
 
-  getSize = (width: number): string => {
-    let size: string = 'regular';
+  getSize = (width: number): UISize => {
     if (width < 730) {
-      size = 'tiny';
+      return UISize.Tiny;
     } else if (width < 1260) {
-      size = 'small';
+      return UISize.Small;
+    } else {
+      return UISize.Regular;
     }
-    return size;
   };
+
+  getShortCutTitleItem(title: string) {
+    return (
+      <div className={CellStyle}>
+        <ShortcutTitleItem
+          title={title}
+          updateSort={this.props.updateSort}
+          active={this.props.currentSort}
+        />
+      </div>
+    );
+  }
 
   render() {
     return (
@@ -287,39 +273,13 @@ export class TopNav extends React.Component<ITopNavProps, {}> {
         </div>
         <div className={HeaderRowContainerStyle}>
           <div className={HeaderRowStyle}>
-            <div className={CellStyle}>
-              <ShortcutTitleItem
-                title="Category"
-                updateSort={this.props.updateSort}
-                active={this.props.currentSort}
-              />
-            </div>
-            <div className={CellStyle}>
-              <ShortcutTitleItem
-                title="Command"
-                updateSort={this.props.updateSort}
-                active={this.props.currentSort}
-              />
-            </div>
+            {this.getShortCutTitleItem('Category')}
+            {this.getShortCutTitleItem('Command')}
             <div className={CellStyle}>
               <div className="title-div">Shortcut</div>
             </div>
-            <div className={CellStyle}>
-              <ShortcutTitleItem
-                title="Source"
-                updateSort={this.props.updateSort}
-                active={this.props.currentSort}
-              />
-            </div>
-            {this.props.showSelectors && (
-              <div className={CellStyle}>
-                <ShortcutTitleItem
-                  title="Selectors"
-                  updateSort={this.props.updateSort}
-                  active={this.props.currentSort}
-                />
-              </div>
-            )}
+            {this.getShortCutTitleItem('Source')}
+            {this.props.showSelectors && this.getShortCutTitleItem('Selectors')}
           </div>
         </div>
       </div>

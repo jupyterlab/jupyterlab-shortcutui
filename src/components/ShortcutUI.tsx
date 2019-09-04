@@ -1,18 +1,14 @@
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 
-import { CommandRegistry } from '@phosphor/commands';
-
 import { ArrayExt, StringExt } from '@phosphor/algorithm';
-
-import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { ShortcutList } from './ShortcutList';
 
 import { TopNav } from './TopNav';
 
-import { Menu } from '@phosphor/widgets';
-
 import { ShortcutObject, ErrorObject, TakenByObject } from '../index';
+
+import { IShortcutUIexternal } from '../ShortcutWidget';
 
 import {
   TopWhitespaceStyle,
@@ -29,15 +25,17 @@ const enum MatchType {
   Default
 }
 
+export const enum UISize {
+  Regular,
+  Small,
+  Tiny
+}
+
 /** Props for ShortcutUI component */
 export interface IShortcutUIProps {
-  commandList: string[];
-  settingRegistry: ISettingRegistry;
-  shortcutPlugin: string;
-  commandRegistry: CommandRegistry;
+  external: IShortcutUIexternal;
   height: number;
   width: number;
-  app: JupyterFrontEnd;
 }
 
 /** State for ShortcutUI component */
@@ -190,10 +188,10 @@ function matchItems(items: any, query: string): any {
 
 /** Transform SettingRegistry's shortcut list to list of ShortcutObjects */
 function getShortcutObjects(
-  commands: CommandRegistry,
-  shortcutsObj: ISettingRegistry.ISettings
+  external: IShortcutUIexternal,
+  settings: ISettingRegistry.ISettings
 ): { [index: string]: ShortcutObject } {
-  const shortcuts = shortcutsObj.composite.shortcuts as ReadonlyJSONArray;
+  const shortcuts = settings.composite.shortcuts as ReadonlyJSONArray;
   let shortcutObjects: { [index: string]: ShortcutObject } = {};
   shortcuts.forEach((shortcut: any) => {
     let key = shortcut.command + '_' + shortcut.selector;
@@ -204,7 +202,7 @@ function getShortcutObjects(
     } else {
       let shortcutObject = new ShortcutObject();
       shortcutObject.commandName = shortcut.command;
-      let label = commands.label(shortcut.command);
+      let label = external.getLabel(shortcut.command);
       if (!label) {
         label = shortcut.command.split(':')[1];
       }
@@ -217,6 +215,14 @@ function getShortcutObjects(
       shortcutObject.numberOfShortcuts = 1;
       shortcutObjects[key] = shortcutObject;
     }
+  });
+  // find all the shortcuts that have custom settings
+  const userShortcuts: any = settings.user.shortcuts;
+  userShortcuts.forEach((userSetting: any) => {
+    const command: string = userSetting.command;
+    const selector: string = userSetting.selector;
+    const keyTo = command + '_' + selector;
+    shortcutObjects[keyTo].source = 'Custom';
   });
   return shortcutObjects;
 }
@@ -250,8 +256,6 @@ export class ShortcutUI extends React.Component<
 > {
   constructor(props: any) {
     super(props);
-    const { commands } = this.props.app;
-
     this.state = {
       shortcutList: {},
       filteredShortcutList: new Array<ShortcutObject>(),
@@ -260,7 +264,7 @@ export class ShortcutUI extends React.Component<
       showSelectors: false,
       currentSort: 'category',
       keyBindingsUsed: {},
-      contextMenu: new Menu({ commands })
+      contextMenu: this.props.external.createMenu()
     };
   }
 
@@ -268,32 +272,10 @@ export class ShortcutUI extends React.Component<
   componentDidMount(): void {
     void this._refreshShortcutList();
   }
-
-  /** Flag all user-set shortcuts as custom */
-  private async _getShortcutSource(shortcutObjects: {
-    [index: string]: ShortcutObject;
-  }): Promise<void> {
-    const customShortcuts: ISettingRegistry.ISettings = await this.props.settingRegistry.reload(
-      this.props.shortcutPlugin
-    );
-    const userShortcuts: any = customShortcuts.user.shortcuts;
-    userShortcuts.forEach((userSetting: any) => {
-      const command: string = userSetting.command;
-      const selector: string = userSetting.selector;
-      const keyTo = command + '_' + selector;
-      shortcutObjects[keyTo].source = 'Custom';
-    });
-  }
-
   /** Fetch shortcut list from SettingRegistry  */
   private async _refreshShortcutList(): Promise<void> {
-    const shortcuts: ISettingRegistry.ISettings = await this.props.settingRegistry.reload(
-      this.props.shortcutPlugin
-    );
-    const shortcutObjects: {
-      [index: string]: ShortcutObject;
-    } = getShortcutObjects(this.props.commandRegistry, shortcuts);
-    await this._getShortcutSource(shortcutObjects);
+    const shortcuts: ISettingRegistry.ISettings = await this.props.external.getAllShortCutSettings();
+    const shortcutObjects = getShortcutObjects(this.props.external, shortcuts);
     this.setState(
       {
         shortcutList: shortcutObjects,
@@ -302,7 +284,7 @@ export class ShortcutUI extends React.Component<
       },
       () => {
         let keyBindingsUsed = getKeyBindingsUsed(shortcutObjects);
-        this.setState({ keyBindingsUsed: keyBindingsUsed });
+        this.setState({ keyBindingsUsed });
         this.sortShortcuts();
       }
     );
@@ -341,20 +323,16 @@ export class ShortcutUI extends React.Component<
 
   /** Reset all shortcuts to their defaults */
   resetShortcuts = async () => {
-    const settings = await this.props.settingRegistry.reload(
-      this.props.shortcutPlugin
-    );
+    const settings = await this.props.external.getAllShortCutSettings();
     for (const key of Object.keys(settings.user)) {
-      await this.props.settingRegistry.remove(this.props.shortcutPlugin, key);
+      await this.props.external.removeShortCut(key);
     }
     await this._refreshShortcutList();
   };
 
   /** Set new shortcut for command, refresh state */
   handleUpdate = async (shortcutObject: ShortcutObject, keys: string[]) => {
-    const settings: ISettingRegistry.ISettings = await this.props.settingRegistry.reload(
-      this.props.shortcutPlugin
-    );
+    const settings: ISettingRegistry.ISettings = await this.props.external.getAllShortCutSettings();
     const userShortcuts = settings.user.shortcuts as ReadonlyJSONArray;
     const newUserShortcuts = [];
     let found = false;
@@ -395,9 +373,7 @@ export class ShortcutUI extends React.Component<
 
   /** Reset a specific shortcut to its default settings */
   resetShortcut = async (shortcutObject: ShortcutObject) => {
-    const settings: ISettingRegistry.ISettings = await this.props.settingRegistry.reload(
-      this.props.shortcutPlugin
-    );
+    const settings: ISettingRegistry.ISettings = await this.props.external.getAllShortCutSettings();
     const userShortcuts = settings.user.shortcuts as ReadonlyJSONArray;
     const newUserShortcuts = [];
     for (let shortcut of userShortcuts) {
@@ -414,7 +390,7 @@ export class ShortcutUI extends React.Component<
 
   /** Opens advanced setting registry */
   openAdvanced = (): void => {
-    void this.props.commandRegistry.execute('settingeditor:open');
+    void this.props.external.openAdvanced();
   };
 
   /** Toggles showing command selectors */
@@ -489,15 +465,14 @@ export class ShortcutUI extends React.Component<
 
   contextMenu = (event: any, commandIDs: string[]) => {
     event.persist();
-    const { commands } = this.props.app;
     this.setState(
       {
-        contextMenu: new Menu({ commands })
+        contextMenu: this.props.external.createMenu()
       },
       () => {
         event.preventDefault();
         for (let command of commandIDs) {
-          this.state.contextMenu.addItem({ command: command });
+          this.state.contextMenu.addItem({ command });
         }
         this.state.contextMenu.open(event.clientX, event.clientY);
       }
@@ -520,7 +495,7 @@ export class ShortcutUI extends React.Component<
           updateSort={this.updateSort}
           currentSort={this.state.currentSort}
           width={this.props.width}
-          app={this.props.app}
+          external={this.props.external}
         />
         <ShortcutList
           shortcuts={this.state.filteredShortcutList}
@@ -532,9 +507,9 @@ export class ShortcutUI extends React.Component<
           sortConflict={this.sortConflict}
           clearConflicts={this.clearConflicts}
           height={this.props.height}
-          errorSize={this.props.width < 775 ? 'small' : 'regular'}
+          errorSize={this.props.width < 775 ? UISize.Small : UISize.Regular}
           contextMenu={this.contextMenu}
-          app={this.props.app}
+          external={this.props.external}
         />
       </div>
     );

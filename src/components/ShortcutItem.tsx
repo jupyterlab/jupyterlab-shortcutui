@@ -27,7 +27,8 @@ import {
   SourceCellStyle,
   ResetStyle
 } from '../componentStyle/ShortcutItemStyle';
-import { JupyterFrontEnd } from '@jupyterlab/application';
+import { IShortcutUIexternal } from '../ShortcutWidget';
+import { UISize } from './ShortcutUI';
 
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {
@@ -39,9 +40,9 @@ export interface IShortcutItemProps {
   keyBindingsUsed: { [index: string]: TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;
-  errorSize: string;
+  errorSize: UISize;
   contextMenu: Function;
-  app: JupyterFrontEnd;
+  external: IShortcutUIexternal;
 }
 
 /** State for ShortcutItem component */
@@ -52,13 +53,43 @@ export interface IShortcutItemState {
   numShortcuts: number;
 }
 
-export namespace CommandIDs {
-  export const shortcutEditLeft = 'shortcutui:EditLeft';
-  export const shortcutEditRight = 'shortcutui:EditRight';
-  export const shortcutEdit = 'shortcutui:Edit';
-  export const shortcutAddNew = 'shortcutui:AddNew';
-  export const shortcutAddAnother = 'shortcutui:AddAnother';
-  export const shortcutReset = 'shortcutui:Reset';
+enum ShortCutLocation {
+  Left,
+  Right
+}
+
+/** Describe commands that are used by shortcuts */
+namespace Commands {
+  export const shortcutEditLeft = {
+    commandId: 'shortcutui:EditLeft',
+    label: 'Edit First',
+    caption: 'Edit existing shortcut'
+  };
+  export const shortcutEditRight = {
+    commandId: 'shortcutui:EditRight',
+    label: 'Edit Second',
+    caption: 'Edit existing shortcut'
+  };
+  export const shortcutEdit = {
+    commandId: 'shortcutui:Edit',
+    label: 'Edit',
+    caption: 'Edit existing sortcut'
+  };
+  export const shortcutAddNew = {
+    commandId: 'shortcutui:AddNew',
+    label: 'Add',
+    caption: 'Add new shortcut'
+  };
+  export const shortcutAddAnother = {
+    commandId: 'shortcutui:AddAnother',
+    label: 'Add',
+    caption: 'Add another shortcut'
+  };
+  export const shortcutReset = {
+    commandId: 'shortcutui:Reset',
+    label: 'Reset',
+    caption: 'Reset shortcut back to default'
+  };
 }
 
 /** React component for each command shortcut item */
@@ -98,70 +129,41 @@ export class ShortcutItem extends React.Component<
     });
   };
 
-  private handleRightClick = (e: any): void => {
+  private addCommandIfNeeded = (command: any, action: () => void): void => {
     const key =
       this.props.shortcut.commandName + '_' + this.props.shortcut.selector;
 
-    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutEdit + key)) {
-      this.props.app.commands.addCommand(CommandIDs.shortcutEdit + key, {
-        label: 'Edit',
-        caption: 'Edit existing sortcut',
-        execute: () => {
-          this.toggleInputReplaceLeft();
-        }
+    if (!this.props.external.hasCommand(command.commandId + key)) {
+      this.props.external.addCommand(command.commandId + key, {
+        label: command.label,
+        caption: command.caption,
+        execute: action
       });
     }
-    if (
-      !this.props.app.commands.hasCommand(CommandIDs.shortcutEditLeft + key)
-    ) {
-      this.props.app.commands.addCommand(CommandIDs.shortcutEditLeft + key, {
-        label: 'Edit First',
-        caption: 'Edit existing shortcut',
-        execute: () => {
-          this.toggleInputReplaceLeft();
-        }
-      });
-    }
-    if (
-      !this.props.app.commands.hasCommand(CommandIDs.shortcutEditRight + key)
-    ) {
-      this.props.app.commands.addCommand(CommandIDs.shortcutEditRight + key, {
-        label: 'Edit Second',
-        caption: 'Edit existing shortcut',
-        execute: () => {
-          this.toggleInputReplaceRight();
-        }
-      });
-    }
-    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutAddNew + key)) {
-      this.props.app.commands.addCommand(CommandIDs.shortcutAddNew + key, {
-        label: 'Add',
-        caption: 'Add new shortcut',
-        execute: () => {
-          this.toggleInputNew();
-        }
-      });
-    }
-    if (
-      !this.props.app.commands.hasCommand(CommandIDs.shortcutAddAnother + key)
-    ) {
-      this.props.app.commands.addCommand(CommandIDs.shortcutAddAnother + key, {
-        label: 'Add',
-        caption: 'Add another shortcut',
-        execute: () => {
-          this.toggleInputNew();
-        }
-      });
-    }
-    if (!this.props.app.commands.hasCommand(CommandIDs.shortcutReset + key)) {
-      this.props.app.commands.addCommand(CommandIDs.shortcutReset + key, {
-        label: 'Reset',
-        caption: 'Reset shortcut back to default',
-        execute: () => {
-          this.props.resetShortcut(this.props.shortcut);
-        }
-      });
-    }
+  };
+
+  private handleRightClick = (e: any): void => {
+    this.addCommandIfNeeded(Commands.shortcutEdit, () =>
+      this.toggleInputReplaceLeft()
+    );
+    this.addCommandIfNeeded(Commands.shortcutEditLeft, () =>
+      this.toggleInputReplaceLeft()
+    );
+    this.addCommandIfNeeded(Commands.shortcutEditRight, () =>
+      this.toggleInputReplaceRight()
+    );
+    this.addCommandIfNeeded(Commands.shortcutAddNew, () =>
+      this.toggleInputNew()
+    );
+    this.addCommandIfNeeded(Commands.shortcutAddAnother, () =>
+      this.toggleInputNew()
+    );
+    this.addCommandIfNeeded(Commands.shortcutReset, () =>
+      this.props.resetShortcut(this.props.shortcut)
+    );
+
+    const key =
+      this.props.shortcut.commandName + '_' + this.props.shortcut.selector;
 
     this.setState(
       {
@@ -173,20 +175,24 @@ export class ShortcutItem extends React.Component<
         let commandList = [];
         if (this.state.numShortcuts == 2) {
           commandList = commandList.concat([
-            CommandIDs.shortcutEditLeft + key,
-            CommandIDs.shortcutEditRight + key
+            Commands.shortcutEditLeft.commandId + key,
+            Commands.shortcutEditRight.commandId + key
           ]);
         } else if (this.state.numShortcuts == 1) {
           commandList = commandList.concat([
-            CommandIDs.shortcutEdit + key,
-            CommandIDs.shortcutAddAnother + key
+            Commands.shortcutEdit.commandId + key,
+            Commands.shortcutAddAnother.commandId + key
           ]);
         } else {
-          commandList = commandList.concat([CommandIDs.shortcutAddNew + key]);
+          commandList = commandList.concat([
+            Commands.shortcutAddNew.commandId + key
+          ]);
         }
 
         if (this.props.shortcut.source === 'Custom') {
-          commandList = commandList.concat([CommandIDs.shortcutReset + key]);
+          commandList = commandList.concat([
+            Commands.shortcutReset.commandId + key
+          ]);
         }
 
         this.props.contextMenu(e, commandList);
@@ -285,135 +291,171 @@ export class ShortcutItem extends React.Component<
     );
   }
 
+  getClassNameForShortCuts(nonEmptyKeys: string[]): string {
+    return nonEmptyKeys.length === 0
+      ? classes(ShortcutCellStyle, EmptyShortcutCellStyle)
+      : nonEmptyKeys.length === 1
+      ? classes(ShortcutCellStyle, SingleShortcutCellStyle)
+      : ShortcutCellStyle;
+  }
+
+  getToggleInputReplaceMethod(location: ShortCutLocation): () => void {
+    switch (location) {
+      case ShortCutLocation.Left:
+        return this.toggleInputReplaceLeft;
+      case ShortCutLocation.Right:
+        return this.toggleInputReplaceRight;
+    }
+  }
+
+  getDisplayReplaceInput(location: ShortCutLocation): boolean {
+    switch (location) {
+      case ShortCutLocation.Left:
+        return this.state.displayReplaceInputLeft;
+      case ShortCutLocation.Right:
+        return this.state.displayReplaceInputRight;
+    }
+  }
+
+  getOrDiplayIfNeeded(nonEmptyKeys: string[]): JSX.Element {
+    return (
+      <div
+        className={
+          nonEmptyKeys.length == 2 || this.state.displayNewInput
+            ? OrTwoStyle
+            : OrStyle
+        }
+        id={
+          nonEmptyKeys.length == 2
+            ? 'secondor'
+            : this.state.displayReplaceInputLeft
+            ? 'noor'
+            : 'or'
+        }
+      >
+        or
+      </div>
+    );
+  }
+
+  getShortCutAsInput(key: string, location: ShortCutLocation): JSX.Element {
+    return (
+      <ShortcutInput
+        handleUpdate={this.props.handleUpdate}
+        deleteShortcut={this.props.deleteShortcut}
+        toggleInput={this.getToggleInputReplaceMethod(location)}
+        shortcut={this.props.shortcut}
+        shortcutId={key}
+        toSymbols={this.toSymbols}
+        keyBindingsUsed={this.props.keyBindingsUsed}
+        sortConflict={this.props.sortConflict}
+        clearConflicts={this.props.clearConflicts}
+        displayInput={this.getDisplayReplaceInput(location)}
+        newOrReplace={'replace'}
+        placeholder={this.toSymbols(this.props.shortcut.keys[key].join(', '))}
+      />
+    );
+  }
+
+  getShortCutForDisplayOnly(key: string): JSX.Element[] {
+    return this.props.shortcut.keys[key].map(
+      (keyBinding: string, index: number) => (
+        <div className={ShortcutKeysContainerStyle} key={index}>
+          <div className={ShortcutKeysStyle} id={'shortcut-keys'}>
+            {this.toSymbols(keyBinding)}
+          </div>
+          {index + 1 < this.props.shortcut.keys[key].length ? (
+            <div className={CommaStyle}>,</div>
+          ) : null}
+        </div>
+      )
+    );
+  }
+
+  isLocationBeingEdited(location: ShortCutLocation): boolean {
+    return (
+      (location === ShortCutLocation.Left &&
+        this.state.displayReplaceInputLeft) ||
+      (location === ShortCutLocation.Right &&
+        this.state.displayReplaceInputRight)
+    );
+  }
+
+  getLocationFromIndex(index: number): ShortCutLocation {
+    return index === 0 ? ShortCutLocation.Left : ShortCutLocation.Right;
+  }
+
+  getDivForKey(
+    index: number,
+    key: string,
+    nonEmptyKeys: string[]
+  ): JSX.Element {
+    const location = this.getLocationFromIndex(index);
+    return (
+      <div
+        className={ShortcutContainerStyle}
+        key={this.props.shortcut.id + '_' + index}
+        onClick={this.getToggleInputReplaceMethod(location)}
+      >
+        {this.isLocationBeingEdited(location)
+          ? this.getShortCutAsInput(key, location)
+          : this.getShortCutForDisplayOnly(key)}
+        {location === ShortCutLocation.Left &&
+          this.getOrDiplayIfNeeded(nonEmptyKeys)}
+      </div>
+    );
+  }
+
+  getAddLink(): JSX.Element {
+    return (
+      <a
+        className={!this.state.displayNewInput ? PlusStyle : ''}
+        onClick={() => {
+          this.toggleInputNew(), this.props.clearConflicts();
+        }}
+        id="add-link"
+      >
+        Add
+      </a>
+    );
+  }
+
+  getInputBoxWhenToggled(): JSX.Element {
+    return (
+      this.state.displayNewInput && (
+        <ShortcutInput
+          handleUpdate={this.props.handleUpdate}
+          deleteShortcut={this.props.deleteShortcut}
+          toggleInput={this.toggleInputNew}
+          shortcut={this.props.shortcut}
+          shortcutId=""
+          toSymbols={this.toSymbols}
+          keyBindingsUsed={this.props.keyBindingsUsed}
+          sortConflict={this.props.sortConflict}
+          clearConflicts={this.props.clearConflicts}
+          displayInput={this.state.displayNewInput}
+          newOrReplace={'new'}
+          placeholder={''}
+        />
+      )
+    );
+  }
+
   getShortCutsCell(nonEmptyKeys: string[]): JSX.Element {
     return (
       <div className={CellStyle}>
-        <div
-          className={
-            nonEmptyKeys.length === 0
-              ? classes(ShortcutCellStyle, EmptyShortcutCellStyle)
-              : nonEmptyKeys.length === 1
-              ? classes(ShortcutCellStyle, SingleShortcutCellStyle)
-              : ShortcutCellStyle
-          }
-        >
-          {nonEmptyKeys.map((key, index) => (
-            <div
-              className={ShortcutContainerStyle}
-              key={this.props.shortcut.id + '_' + index}
-              onClick={() => {
-                if (index == 0) {
-                  this.toggleInputReplaceLeft();
-                } else {
-                  this.toggleInputReplaceRight();
-                }
-              }}
-            >
-              {!(
-                (index === 0 && this.state.displayReplaceInputLeft) ||
-                (index === 1 && this.state.displayReplaceInputRight)
-              ) ? (
-                this.props.shortcut.keys[key].map(
-                  (keyBinding: string, index: number) => (
-                    <div className={ShortcutKeysContainerStyle} key={index}>
-                      <div className={ShortcutKeysStyle} id={'shortcut-keys'}>
-                        {this.toSymbols(keyBinding)}
-                      </div>
-                      {index + 1 < this.props.shortcut.keys[key].length ? (
-                        <div className={CommaStyle}>,</div>
-                      ) : null}
-                    </div>
-                  )
-                )
-              ) : (
-                <ShortcutInput
-                  handleUpdate={this.props.handleUpdate}
-                  deleteShortcut={this.props.deleteShortcut}
-                  toggleInput={
-                    index === 0
-                      ? this.toggleInputReplaceLeft
-                      : this.toggleInputReplaceRight
-                  }
-                  shortcut={this.props.shortcut}
-                  shortcutId={key}
-                  toSymbols={this.toSymbols}
-                  keyBindingsUsed={this.props.keyBindingsUsed}
-                  sortConflict={this.props.sortConflict}
-                  clearConflicts={this.props.clearConflicts}
-                  displayInput={
-                    index === 0
-                      ? this.state.displayReplaceInputLeft
-                      : this.state.displayReplaceInputRight
-                  }
-                  newOrReplace={'replace'}
-                  placeholder={this.toSymbols(
-                    this.props.shortcut.keys[key].join(', ')
-                  )}
-                />
-              )}
-              {index === 0 && (
-                <div
-                  className={
-                    nonEmptyKeys.length == 2 || this.state.displayNewInput
-                      ? OrTwoStyle
-                      : OrStyle
-                  }
-                  id={
-                    nonEmptyKeys.length == 2
-                      ? 'secondor'
-                      : this.state.displayReplaceInputLeft
-                      ? 'noor'
-                      : 'or'
-                  }
-                >
-                  or
-                </div>
-              )}
-            </div>
-          ))}
-
+        <div className={this.getClassNameForShortCuts(nonEmptyKeys)}>
+          {nonEmptyKeys.map((key, index) =>
+            this.getDivForKey(index, key, nonEmptyKeys)
+          )}
           {nonEmptyKeys.length === 1 &&
             !this.state.displayNewInput &&
-            !this.state.displayReplaceInputLeft && (
-              <a
-                className={!this.state.displayNewInput ? PlusStyle : ''}
-                onClick={() => {
-                  this.toggleInputNew(), this.props.clearConflicts();
-                }}
-                id="add-link"
-              >
-                Add
-              </a>
-            )}
-          {nonEmptyKeys.length === 0 && !this.state.displayNewInput && (
-            <a
-              className={!this.state.displayNewInput ? PlusStyle : ''}
-              onClick={() => {
-                this.toggleInputNew(), this.props.clearConflicts();
-              }}
-              id="add-link"
-            >
-              Add
-            </a>
-          )}
-
-          {/** Display input box when toggled */}
-          {this.state.displayNewInput && (
-            <ShortcutInput
-              handleUpdate={this.props.handleUpdate}
-              deleteShortcut={this.props.deleteShortcut}
-              toggleInput={this.toggleInputNew}
-              shortcut={this.props.shortcut}
-              shortcutId=""
-              toSymbols={this.toSymbols}
-              keyBindingsUsed={this.props.keyBindingsUsed}
-              sortConflict={this.props.sortConflict}
-              clearConflicts={this.props.clearConflicts}
-              displayInput={this.state.displayNewInput}
-              newOrReplace={'new'}
-              placeholder={''}
-            />
-          )}
+            !this.state.displayReplaceInputLeft &&
+            this.getAddLink()}
+          {nonEmptyKeys.length === 0 &&
+            !this.state.displayNewInput &&
+            this.getAddLink()}
+          {this.getInputBoxWhenToggled()}
         </div>
       </div>
     );

@@ -1,8 +1,10 @@
+import { Menu } from '@lumino/widgets';
+
 import * as React from 'react';
 
 import { classes } from 'typestyle';
 
-import { Menu } from '@phosphor/widgets';
+import { CellStyle } from '../componentStyle/ShortcutItemStyle';
 
 import {
   TopStyle,
@@ -23,10 +25,10 @@ import {
   controlIconStyle
 } from '../componentStyle/TopNavStyle';
 
-import { CellStyle } from '../componentStyle/ShortcutItemStyle';
+import { IShortcutUIexternal } from '../ShortcutWidget';
 
 import { ShortcutTitleItem } from './ShortcutTitleItem';
-import { IShortcutUIexternal } from '../ShortcutWidget';
+
 import { UISize } from './ShortcutUI';
 
 export interface IAdvancedOptionsProps {

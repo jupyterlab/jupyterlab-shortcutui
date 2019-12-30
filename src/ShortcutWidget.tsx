@@ -1,17 +1,18 @@
 import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { CommandRegistry } from '@lumino/commands';
+
+import { IDisposable } from '@lumino/disposable';
+
+import { Widget, Title, Menu } from '@lumino/widgets';
+
 import * as React from 'react';
 
-import { ShortcutUI } from './components/ShortcutUI';
-
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
-import { CommandRegistry } from '@phosphor/commands';
-
-import { Widget, Title, Menu } from '@phosphor/widgets';
-
 import * as ReactDOM from 'react-dom';
-import { IDisposable } from '@phosphor/disposable';
+
+import { ShortcutUI } from './components/ShortcutUI';
 
 /** All external actions, setting commands, getting command list ... */
 export interface IShortcutUIexternal {
@@ -37,7 +38,7 @@ export default class ShortcutWidget extends VDomRenderer<VDomModel> {
   reactComponent: React.ReactElement<any>;
 
   constructor(external: IShortcutUIexternal) {
-    super();
+    super(undefined);
     this.height = -1;
     this.width = -1;
     this.external = external;

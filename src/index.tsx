@@ -108,8 +108,7 @@ function activate(
 ): void {
   const command = 'shortcutui:open-ui';
   const label = 'Keyboard Shortcut Editor';
-  let widget: MainAreaWidget<ShortcutWidget>;
-  // Track and restore the widget state
+  let widget: MainAreaWidget<ShortcutWidget> | null = null;
   const tracker = new WidgetTracker<MainAreaWidget<ShortcutWidget>>({
     namespace: 'shortcutui'
   });
@@ -118,21 +117,17 @@ function activate(
   app.commands.addCommand(command, {
     label: label,
     execute: async () => {
-      if (widget == undefined || !widget.isAttached) {
+      if (widget === null || widget.isDisposed) {
         widget = createWidget(settingRegistry, label, app);
       }
-
       if (!tracker.has(widget)) {
-        // Track the state of the widget for later restoration
-        tracker.add(widget);
+        void tracker.add(widget);
       }
-      if (!widget.isAttached) {
-        /** Attach the widget to the main work area if it's not there */
-        app.shell.add(widget as Widget);
-      } else {
+      if (widget.isAttached) {
         widget.update();
+      } else {
+        app.shell.add(widget as Widget);
       }
-      /** Activate the widget */
       app.shell.activateById(widget.id);
     }
   });
@@ -147,10 +142,7 @@ function activate(
   menu.helpMenu.addGroup([{ command: command }], 7);
 
   if (restorer) {
-    restorer.restore(tracker, {
-      command,
-      name: () => 'shortcutui'
-    });
+    void restorer.restore(tracker, { command, name: () => 'shortcutui' });
   }
 }
 
@@ -182,7 +174,7 @@ function createWidget(
   const widget: ShortcutWidget = new ShortcutWidget(
     getExternalForJupyterLab(settingRegistry, app)
   );
-  widget.id = 'jupyterlab-shortcutui';
+  widget.id = 'jp-shortcutui';
   widget.title.label = label;
   widget.title.closable = true;
   return new MainAreaWidget({ content: widget });

@@ -118,25 +118,25 @@ export class ShortcutInput extends React.Component<
         .trim();
 
       /** if last key was not a modefier then there is a chain */
-      if (modKeys.lastIndexOf(lastKey) === -1 && lastKey != '') {
+      if (modKeys.lastIndexOf(lastKey) === -1 && lastKey !== '') {
         userInput = userInput + ',';
         keys.push(currentChain);
         currentChain = '';
 
         /** check if a modefier key was held down through chain */
-        if (event.ctrlKey && event.key != 'Control') {
+        if (event.ctrlKey && event.key !== 'Control') {
           userInput = (userInput + ' Ctrl').trim();
           currentChain = (currentChain + ' Ctrl').trim();
         }
-        if (event.metaKey && event.key != 'Meta') {
+        if (event.metaKey && event.key !== 'Meta') {
           userInput = (userInput + ' Accel').trim();
           currentChain = (currentChain + ' Accel').trim();
         }
-        if (event.altKey && event.key != 'Alt') {
+        if (event.altKey && event.key !== 'Alt') {
           userInput = (userInput + ' Alt').trim();
           currentChain = (currentChain + ' Alt').trim();
         }
-        if (event.shiftKey && event.key != 'Shift') {
+        if (event.shiftKey && event.key !== 'Shift') {
           userInput = (userInput + ' Shift').trim();
           currentChain = (currentChain + ' Shift').trim();
         }
@@ -201,7 +201,7 @@ export class ShortcutInput extends React.Component<
   /**
    * Check if shorcut being typed will work
    * (does not end with ctrl, alt, command, or shift)
-   * */
+   */
   checkNonFunctional = (shortcut: string): boolean => {
     const dontEnd = ['Ctrl', 'Alt', 'Accel', 'Shift'];
     const shortcutKeys = this.state.currentChain.split(' ');
@@ -408,7 +408,7 @@ export class ShortcutInput extends React.Component<
                 });
                 this.props.clearConflicts();
               } else {
-                this.handleReplace();
+                void this.handleReplace();
               }
             }
           }}
@@ -418,7 +418,7 @@ export class ShortcutInput extends React.Component<
             hidden
             id="overwrite"
             onClick={() => {
-              this.handleOverwrite();
+              void this.handleOverwrite();
               this.props.clearConflicts();
               this.props.toggleInput();
             }}

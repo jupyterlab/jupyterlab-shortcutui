@@ -39,6 +39,7 @@ export default class ShortcutWidget extends VDomRenderer<VDomModel> {
 
   constructor(external: IShortcutUIexternal) {
     super(undefined);
+    this.addClass('jp-ShortcutWidget');
     this.height = -1;
     this.width = -1;
     this.external = external;

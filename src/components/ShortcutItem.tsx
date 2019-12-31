@@ -172,8 +172,8 @@ export class ShortcutItem extends React.Component<
         ).length
       },
       () => {
-        let commandList = [];
-        if (this.state.numShortcuts == 2) {
+        let commandList: string[] = [];
+        if (this.state.numShortcuts === 2) {
           commandList = commandList.concat([
             Commands.shortcutEditLeft.commandId + key,
             Commands.shortcutEditRight.commandId + key

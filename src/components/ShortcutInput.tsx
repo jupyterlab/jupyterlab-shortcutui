@@ -332,8 +332,8 @@ export class ShortcutInput extends React.Component<
   handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
     if (
       event.relatedTarget === null ||
-      ((event.relatedTarget as HTMLElement).id !== 'no-blur' &&
-        (event.relatedTarget as HTMLElement).id !== 'overwrite')
+      (!(event.relatedTarget as HTMLElement).hasAttribute('data-no-blur') &&
+        !(event.relatedTarget as HTMLElement).hasAttribute('data-overwrite'))
     ) {
       this.props.toggleInput();
       this.setState({
@@ -362,7 +362,7 @@ export class ShortcutInput extends React.Component<
       >
         <div
           tabIndex={0}
-          id="no-blur"
+          data-no-blur
           className={inputClassName}
           onKeyDown={this.handleInput}
           ref={input => input && input.focus()}
@@ -387,7 +387,7 @@ export class ShortcutInput extends React.Component<
               ? classes(SubmitStyle, SubmitConflictStyle)
               : classes(SubmitStyle)
           }
-          id={'no-blur'}
+          data-no-blur
           disabled={!this.state.isAvailable || !this.state.isFunctional}
           onClick={() => {
             if (this.props.newOrReplace === 'new') {
@@ -416,7 +416,7 @@ export class ShortcutInput extends React.Component<
         {!this.state.isAvailable && (
           <button
             hidden
-            id="overwrite"
+            data-overwrite
             onClick={() => {
               void this.handleOverwrite();
               this.props.clearConflicts();

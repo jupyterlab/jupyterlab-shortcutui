@@ -236,9 +236,14 @@ export class ShortcutItem extends React.Component<
           <div className={ErrorButtonStyle}>
             <button>Cancel</button>
             <button
-              id="no-blur"
+              data-no-blur
               onClick={() => {
-                document.getElementById('overwrite').click();
+                const el: HTMLElement = document.querySelector(
+                  '.jp-ShortcutWidget [data-overwrite]'
+                );
+                if (el) {
+                  el.click();
+                }
               }}
             >
               Overwrite

@@ -52,10 +52,7 @@ export default class ShortcutWidget extends VDomRenderer<VDomModel> {
         width={this.width}
       />
     );
-    ReactDOM.render(
-      this.reactComponent,
-      document.getElementById('jupyterlab-shortcutui')
-    );
+    ReactDOM.render(this.reactComponent, this.node);
     this.render();
   }
 

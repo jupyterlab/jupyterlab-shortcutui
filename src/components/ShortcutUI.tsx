@@ -485,7 +485,7 @@ export class ShortcutUI extends React.Component<
       return null;
     }
     return (
-      <div className={ShortcutUIStyle} id="jp-shortcutui">
+      <div className={ShortcutUIStyle}>
         <div className={TopWhitespaceStyle} />
         <TopNav
           updateSearchQuery={this.updateSearchQuery}

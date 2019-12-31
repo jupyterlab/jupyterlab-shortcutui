@@ -1,22 +1,23 @@
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { ArrayExt, StringExt } from '@phosphor/algorithm';
+import { ArrayExt, StringExt } from '@lumino/algorithm';
 
-import { ShortcutList } from './ShortcutList';
-
-import { TopNav } from './TopNav';
-
-import { ShortcutObject, ErrorObject, TakenByObject } from '../index';
-
-import { IShortcutUIexternal } from '../ShortcutWidget';
+import { ReadonlyJSONArray } from '@lumino/coreutils';
 
 import {
   TopWhitespaceStyle,
   ShortcutUIStyle
 } from '../componentStyle/ShortcutUIStyle';
 
+import { ShortcutObject, ErrorObject, TakenByObject } from '../index';
+
+import { IShortcutUIexternal } from '../ShortcutWidget';
+
+import { ShortcutList } from './ShortcutList';
+
+import { TopNav } from './TopNav';
+
 import * as React from 'react';
-import { ReadonlyJSONArray } from '@phosphor/coreutils';
 
 const enum MatchType {
   Label,

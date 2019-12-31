@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { classes } from 'typestyle';
 
-import { EN_US } from '@phosphor/keyboard';
+import { EN_US } from '@lumino/keyboard';
 
 import {
   InputStyle,

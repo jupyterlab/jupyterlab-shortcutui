@@ -4,8 +4,6 @@ import {
   JupyterFrontEnd
 } from '@jupyterlab/application';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
 import {
   ICommandPalette,
   MainAreaWidget,
@@ -14,12 +12,15 @@ import {
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { Widget, Menu } from '@phosphor/widgets';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { CommandRegistry } from '@lumino/commands';
+
+import { Widget, Menu } from '@lumino/widgets';
 
 import ShortcutWidget, { IShortcutUIexternal } from './ShortcutWidget';
 
 import '../style/variables.css';
-import { CommandRegistry } from '@phosphor/commands';
 
 /** Object for shortcut items */
 export class ShortcutObject {

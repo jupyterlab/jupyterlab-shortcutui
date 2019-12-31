@@ -2,7 +2,7 @@ import { ShortcutObject, ErrorObject, TakenByObject } from '../index';
 
 import { ShortcutInput } from './ShortcutInput';
 
-import { Platform } from '@phosphor/domutils';
+import { Platform } from '@lumino/domutils';
 
 import { classes } from 'typestyle';
 

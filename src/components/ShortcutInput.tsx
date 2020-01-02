@@ -351,6 +351,7 @@ export class ShortcutInput extends React.Component<
     }
     return (
       <div
+        data-p-suppress-shortcuts
         className={
           this.props.displayInput
             ? this.props.newOrReplace === 'new'

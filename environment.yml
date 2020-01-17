@@ -1,0 +1,8 @@
+name: jupyterlab-shortcutui
+channels:
+- conda-forge
+- conda-forge/label/prerelease-jupyterlab
+dependencies:
+- jupyterlab=2
+- nodejs
+

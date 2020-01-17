@@ -1,3 +1,4 @@
 #!/bin/bash
 
-jupyter labextension install @jupyterlab/shortcutui
+jlpm && jlpm run build && jupyter labextension install . --debug
+

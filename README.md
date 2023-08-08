@@ -1,3 +1,5 @@
+**This repository has been archived** as this feature is part of JupyterLab core since v3.3.0.
+
 # jupyterlab-shortcutui
 
 [![Binder](https://beta.mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-shortcutui/master?urlpath=lab)
